@@ -1,0 +1,73 @@
+/*** Put your css styles here ****/
+
+#fileupload{
+    position: fixed;
+    z-index: 1000;
+    width: 100%;
+    background: #fff;
+    padding: 5px 10px;
+    top: 0;
+    border-bottom: 1px solid #ddd;
+}
+#btnUploadAllFiles{
+    display: none;
+}
+
+#metaFields{
+    top: 50px;
+    position: relative;
+}
+
+#metaFields label{
+    font-size: 13px;
+    padding: 6px 0;
+}
+
+#metaFields input{
+    border-radius: 2px;
+    border: 1px solid #CCC;
+    font-size: 15px;
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
+    padding: 6px 12px;
+}
+
+#metaFields .node{
+    position: relative;
+    border-bottom: 1px solid #ddd;
+    padding: 15px;
+}
+#metaFields .node:nth-child(odd){
+    background-color: #f9f9f9;
+}
+
+#metaFields .btnContainer{
+    position: absolute;
+    top: 0;
+    right: 0;
+}
+
+#metaFields .imagecontainer,
+#metaFields .metacontainer{
+    float: left;
+    margin-right: 10px;
+}
+#metaFields .btnContainer{
+    margin: 15px 15px 0 0;
+}
+
+#metaFields canvas.canvasthumb,
+#metaFields div.imagethumb{
+    height: 100px;
+    width: 120px;
+    background-size: cover;
+    background-position: center center;
+}
+
+#metaFields .btn{
+    float: right;
+    margin-left: 7px;
+}
+
+#metaFields .hiddenIdField{
+    display: none;
+}
