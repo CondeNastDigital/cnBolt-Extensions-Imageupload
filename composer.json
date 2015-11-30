@@ -1,15 +1,15 @@
 {
     "name": "cnd/imageupload",
-    "description": "A description about your extension should go here.",
+    "description": "Extension to upload multiple images with metainformations",
     "type": "bolt-extension",
     "require": {
         "bolt/bolt": ">=2.0.0,<3.0.0"
     },
-    "license": "MIT",
+    "license": "",
     "authors": [
         {
-            "name": "Your Name", 
-            "email": "you@example.com"
+            "name": "Danny Forster",
+            "email": "danny.forster@condenast.de"
         }
     ],
     "autoload": {
