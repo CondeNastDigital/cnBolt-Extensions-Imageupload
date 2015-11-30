@@ -16,7 +16,7 @@ $(document).ready(function () {
         .on('change', function() {
             var files = $(this).get(0).files;
 
-            $('#btnUploadAllFiles').show();
+            //$('#btnUploadAllFiles').show();
 
             $.each(files, function(i, data) {
 

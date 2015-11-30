@@ -10,7 +10,7 @@
     border-bottom: 1px solid #ddd;
 }
 #btnUploadAllFiles{
-    display: none;
+    /*display: none;*/
 }
 
 #metaFields{
