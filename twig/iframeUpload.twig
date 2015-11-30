@@ -4,10 +4,10 @@
 
     <!--link rel="stylesheet" href="//netdna.bootstrapcdn.com/boostrap/3.2.0/css/bootstrap.min.css"-->
     <link rel="stylesheet" href="{{ paths.root }}bolt-public/view/css/bolt.css">
-    <link rel="stylesheet" href="{{ paths.root }}extensions/local/cnd/imageupload/assets/css/jquery.fileupload.css">
-    <link rel="stylesheet" href="{{ paths.root }}extensions/local/cnd/imageupload/assets/css/jquery.fileupload-ui.css">
-    <link rel="stylesheet" href="{{ paths.root }}extensions/local/cnd/imageupload/assets/css/extension.css">
-    <link rel="stylesheet" href="{{ paths.root }}extensions/local/cnd/imageupload/assets/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ paths.extensions }}vendor/cnd/imageupload/assets/css/jquery.fileupload.css">
+    <link rel="stylesheet" href="{{ paths.extensions }}vendor/cnd/imageupload/assets/css/jquery.fileupload-ui.css">
+    <link rel="stylesheet" href="{{ paths.extensions }}vendor/cnd/imageupload/assets/css/extension.css">
+    <link rel="stylesheet" href="{{ paths.extensions }}vendor/cnd/imageupload/assets/css/bootstrap.min.css">
 
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 
@@ -20,7 +20,7 @@
 
     </script>
 
-    <script src="{{ paths.root }}extensions/local/cnd/imageupload/assets/js/start.js"></script>
+    <script src="{{ paths.extensions }}vendor/cnd/imageupload/assets/js/start.js"></script>
 
 
 </head>
@@ -33,7 +33,7 @@
         <noscript><input type="hidden" name="redirect" value="/bolt"></noscript>
         <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
         <div class="fileupload-buttonbar">
-            <div class="">
+            <div>
 
                 <!-- The fileinput-button span is used to style the file input field as button -->
                     <span class="btn btn-success fileinput-button">
@@ -47,21 +47,23 @@
                         <span>Upload All Files</span>
                         <!--input id="btnAddFiles" type="file" name="files[]" multiple-->
                     </span>
-                <!--button type="submit" class="btn btn-primary start">
-                    <i class="glyphicon glyphicon-upload"></i>
-                    <span>Start upload</span>
-                </button>
-                <button type="reset" class="btn btn-warning cancel">
-                    <i class="glyphicon glyphicon-ban-circle"></i>
-                    <span>Cancel upload</span>
-                </button>
-                <button type="button" class="btn btn-danger delete">
-                    <i class="glyphicon glyphicon-trash"></i>
-                    <span>Delete</span>
-                </button>
-                <input type="checkbox" class="toggle"-->
-                <!-- The global file processing state -->
-                <!--span class="fileupload-process"></span-->
+{#
+                    <button type="submit" class="btn btn-primary start">
+                        <i class="glyphicon glyphicon-upload"></i>
+                        <span>Start upload</span>
+                    </button>
+                    <button type="reset" class="btn btn-warning cancel">
+                        <i class="glyphicon glyphicon-ban-circle"></i>
+                        <span>Cancel upload</span>
+                    </button>
+                    <button type="button" class="btn btn-danger delete">
+                        <i class="glyphicon glyphicon-trash"></i>
+                        <span>Delete</span>
+                    </button>
+                    <input type="checkbox" class="toggle">
+                    <!-- The global file processing state -->
+                    <span class="fileupload-process"></span>
+#}
             </div>
             <!-- The global progress state -->
 {#
