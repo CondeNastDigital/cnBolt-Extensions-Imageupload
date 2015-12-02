@@ -1,11 +1,7 @@
 <fieldset class="imageupload">
     <div class="col-sm-12">
-
-        {% set parentContenttype = context.contenttype.singular_slug %}
-        {% set parentField = key %}
-
         <label class="control-label">Multi Fileupload:</label>
-        <iframe src="{{ paths.root }}imageupload/iframe/{{ parentContenttype }}/{{ parentField }}" style="width:100%;height:700px;border:none"></iframe>
+        <iframe src="{{ paths.root }}imageupload/iframe/{{ context.contenttype.singular_slug }}/{{ key }}" style="width:100%;height:700px;border:none"></iframe>
         <input style="display:none" class="form-control large" name="imageupload" id="imageupload" value="{{ context.content.get(contentkey) }}" type="text">
     </div>
 </fieldset>

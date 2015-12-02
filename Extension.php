@@ -19,21 +19,13 @@ class Extension extends BaseExtension
         $this->app['config']->getFields()->addField(new ImageUploadField());
         if ($this->app['config']->getWhichEnd()=='backend') {
             $this->app['htmlsnippets'] = true;
-            #$this->app['twig.loader.filesystem']->prependPath(__DIR__."/twig");
         }
     }
 
     public function initialize() {
 
         $this->config = $this->getConfig();
-/*
-        $this->addCSS('assets/css/extension.css');
-
-        $this->addJquery();
-        $this->addJavascript('assets/js/start.js',true);
-*/
         $this->app->before(array($this, 'before'));
-
         $this->app->mount('/imageupload', new FileController($this->app, $this->config));
     }
 

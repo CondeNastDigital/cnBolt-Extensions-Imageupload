@@ -9,12 +9,17 @@
     top: 0;
     border-bottom: 1px solid #ddd;
 }
-#btnUploadAllFiles{
-    /*display: none;*/
+#fileupload .infotext{
+    padding: 8px 15px;
+    margin: 5px 0;
+    border-radius: 2px;
 }
+#fileupload .infotext.bg-success { color: #7eac6b; }
+#fileupload .infotext.bg-danger { color: #b14a4a }
+
 
 #metaFields{
-    top: 50px;
+    top: 90px;
     position: relative;
 }
 
@@ -39,10 +44,19 @@
 #metaFields .node:nth-child(odd){
     background-color: #f9f9f9;
 }
+#metaFields .node.success{ background-color: #dff0d8; }
+#metaFields .node.error{ background-color: #f2dede; }
 
-#metaFields .btnContainer{
+#metaFields .metacontainer progress{
     position: absolute;
+    right: 0;
     top: 0;
+    margin: 15px 15px 0 0;
+}
+
+#metaFields .metacontainer .btnContainer{
+    position: absolute;
+    top: 20px;
     right: 0;
 }
 
