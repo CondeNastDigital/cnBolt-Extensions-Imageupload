@@ -29,14 +29,9 @@ class Extension extends BaseExtension
         $this->app->mount('/imageupload', new FileController($this->app, $this->config));
     }
 
-    public function before()
-    {
-
-    }
-
     public function getName()
     {
-        return "Multimageupload";
+        return "Multimage-Upload";
     }
 
 }

@@ -2,25 +2,23 @@ $(document).ready(function () {
 
     var index;
     var nodeFileupload = $('#fileupload');
-    var storeUrl = pathsroot + 'imageupload/store/'+parentContenttype+'/'+parentField;
-    var listUrl = pathsroot + 'imageupload/list/'+parentContenttype+'/'+parentField;
-    var deleteUrl = pathsroot + 'imageupload/delete/'+parentContenttype+'/'+parentField;
-
+    var storeUrl = pathsroot + 'imageupload/store/' + parentContenttype + '/' + parentField;
+    var listUrl = pathsroot + 'imageupload/list/' + parentContenttype + '/' + parentField;
+    var deleteUrl = pathsroot + 'imageupload/delete/' + parentContenttype + '/' + parentField;
     var inputImageIds = $('input#imageupload', parent.document);
 
     initialize();
 
 
-
     // Click AddFiles Button
     nodeFileupload.find('#btnAddFiles')
-        .on('change', function() {
+        .on('change', function () {
             var files = $(this).get(0).files;
 
-            $.each(files, function(i, data) {
+            $.each(files, function (i, data) {
 
-              var imageType = /image.*/;
-              var name = data.name;
+                var imageType = /image.*/;
+                var name = data.name;
 
                 if (!data.type.match(imageType))
                     return;
@@ -34,12 +32,12 @@ $(document).ready(function () {
 
                 //specific progress bar
                 context.find('.progressContainer')
-                    .append('<progress value="0" max="100" id="node'+index+'_progress"></progress>');
+                    .append('<progress value="0" max="100" id="node' + index + '_progress"></progress>');
 
                 context.prependTo('#files');
 
-                context.find($('#node'+index+' .imagecontainer'))
-                    .append($('<canvas/>').attr('class','canvasthumb'));
+                context.find($('#node' + index + ' .imagecontainer'))
+                    .append($('<canvas/>').attr('class', 'canvasthumb'));
 
                 var reader = new FileReader();
                 reader.onload = createCanvas(index);
@@ -51,31 +49,30 @@ $(document).ready(function () {
 
         });
 
+
     // Click UploadAllFiles Button
     nodeFileupload.find('#btnUploadAllFiles')
-        .on('click', function(){
+        .on('click', function () {
 
-            var node = $('#metaFields').find('#files').find('div.node');
-            output = [];
+            var nodes = $('#metaFields').find('#files').find('div.node');
 
-            if(node.length > 0) {
+            if (nodes.length > 0) {
 
                 var data = new FormData();
 
-                $.each(node, function() {
+                $.each(nodes, function () {
 
-                    var id = $(this).attr('id').replace('node','');
-
-                    file = $(this).data('file');
-                    metaFields = $('#metaFields').find('#node'+id).find('input');
+                    var id = $(this).attr('id').replace('node', '');
+                    var file = $(this).data('file');
+                    var metaFields = $('#metaFields').find('#node' + id).find('input');
 
                     if (file instanceof File) {
-                        data.append('file_'+id, file);
+                        data.append('file_' + id, file);
                     }
 
-                    $.each(metaFields, function(){
-                        key = ($(this).attr('name'));
-                        value = ($(this).val());
+                    $.each(metaFields, function () {
+                        var key = ($(this).attr('name'));
+                        var value = ($(this).val());
 
                         data.append(key, value);
                     });
@@ -90,24 +87,11 @@ $(document).ready(function () {
                     contentType: false,
                     success: function (res) {
 
-                        var content = [];
-
-                        $.each(res, function(){
-                            content.push($(this)[0].id_slug);
-                        });
-
-                        var jsonString = JSON.stringify(content);
-
-                        inputImageIds.val('{"content": '+jsonString+'}');
-
-                        //location.reload();
-                        $('#files').empty();
-                        initialize();
-
+                        images2inputImageIds(res);
                         nodeFileupload.find('.infotext').addClass('bg-success').text('All Files have been saved successfully!');
 
                     },
-                    error: function(err) {
+                    error: function (err) {
                         console.log(err);
                         nodeFileupload.find('.infotext').addClass('bg-danger').text('An error has occurred! Please try again later');
                     }
@@ -116,23 +100,24 @@ $(document).ready(function () {
 
         });
 
+
     // Click SpecificDeleteFile Button
-    $(document).on('click', '.btnDeleteFile', function(){
+    $(document).on('click', '.btnDeleteFile', function () {
         var parent = $(this).closest('div[id]');
         var newFile = parent.hasClass('newFile');
         var node = parent.attr('id');
 
-        if(newFile){
+        if (newFile) {
             parent.remove();
 
         } else {
 
-            var imageId = $('#'+node).find('.hiddenIdField').val();
+            var imageId = $('#' + node).find('.hiddenIdField').val();
             var jsonObj = $.parseJSON(inputImageIds.val());
             var arr = jsonObj.content;
 
-            $.each(arr, function(key,value){
-                if (value.split('/')[1] == imageId){
+            $.each(arr, function (key, value) {
+                if (value.split('/')[1] == imageId) {
                     tid = value.split('/')[1];
                     type = value.split('/')[0];
                 }
@@ -146,45 +131,33 @@ $(document).ready(function () {
                 type: "POST",
                 success: function (res) {
 
-                    var content = [];
-
-                    $.each(res, function(){
-                        content.push($(this)[0].id_slug);
-                    });
-
-                    var jsonString = JSON.stringify(content);
-
-                    console.log(jsonString);
-
-                    inputImageIds.val('{"content": '+jsonString+'}');
-
-                    $('#files').empty();
-                    initialize();
+                    images2inputImageIds(res);
                 }
 
             });
         }
     });
 
+
     // Click SpecificUploadFile Button
-    $(document).on('click', '.btnUploadFile', function(){
+    $(document).on('click', '.btnUploadFile', function () {
         var button = $(this);
         var parent = $(this).closest('div[id]');
         var data = new FormData();
 
         var node = parent.attr('id');
-        var id = node.replace('node','');
+        var id = node.replace('node', '');
         var file = parent.data('file');
 
-        var metaFields = $('#metaFields').find('#node'+id).find('input');
+        var metaFields = $('#metaFields').find('#node' + id).find('input');
 
         if (file instanceof File) {
-            data.append('file_'+id, file);
+            data.append('file_' + id, file);
         }
 
-        $.each(metaFields, function(){
-            key = ($(this).attr('name'));
-            value = ($(this).val());
+        $.each(metaFields, function () {
+            var key = ($(this).attr('name'));
+            var value = ($(this).val());
 
             data.append(key, value);
         });
@@ -192,10 +165,10 @@ $(document).ready(function () {
         $.ajax({
             url: storeUrl,
             type: 'POST',
-            xhr: function() {
+            xhr: function () {
                 var myXhr = $.ajaxSettings.xhr();
-                if(myXhr.upload){
-                    myXhr.upload.addEventListener('progress',progressHandlingFunction(node), false);
+                if (myXhr.upload) {
+                    myXhr.upload.addEventListener('progress', progressHandlingFunction(node), false);
                 }
                 return myXhr;
             },
@@ -205,35 +178,31 @@ $(document).ready(function () {
             success: function (res) {
 
                 var jsonObj = $.parseJSON(inputImageIds.val());
-                var arr = jsonObj.content;
+                var contentObject = jsonObj.content;
 
-                $.each(res, function(){
-                    arr.push($(this)[0].id_slug);
+                $.each(res, function () {
+                    contentObject.push($(this)[0].id_slug);
                 });
 
-                var jsonString = JSON.stringify(arr);
-                inputImageIds.val('{"content": '+jsonString+'}');
+                var jsonString = JSON.stringify(contentObject);
+
+                inputImageIds.val('{"content": ' + jsonString + '}');
 
                 button.addClass('btn-success').removeClass('btn-primary btn-danger btnUploadFile');
                 button.find('.glyphicon-upload').addClass('glyphicon-ok').removeClass('glyphicon-upload glyphicon-remove');
+                $('#' + node).addClass('success').removeClass('error newFile').find('button.btnDeleteFile').remove();
+
                 nodeFileupload.find('.infotext').removeClass('bg-success bg-danger').text('');
 
-                $('#'+node).addClass('success').removeClass('error');
-
             },
-            error: function(err) {
+            error: function (err) {
                 console.log(err.responseText);
                 button.addClass('btn-danger').removeClass('btn-primary');
                 button.find('.glyphicon-upload').addClass('glyphicon-remove');
-                $('#'+node).addClass('error');
+                $('#' + node).addClass('error');
             }
         })
-
-
-
     });
-
-
 
 
     //first initial loading of linked imageObjects while loading a new or present page
@@ -245,12 +214,12 @@ $(document).ready(function () {
             url: listUrl,
             type: 'POST',
             data: inputImageIds.val(),
-            success: function(res){
+            success: function (res) {
 
-                var blacklist = ['datechanged','datecreated','datedepublish','datepublish','ownerid','slug','status','templatefields'];
-                var whitelist = imagefields;
+                blacklist = ['datechanged', 'datecreated', 'datedepublish', 'datepublish', 'ownerid', 'slug', 'status', 'templatefields'];
+                whitelist = imagefields;
 
-                $.each(res, function(){
+                $.each(res, function () {
 
                     var entries = $(this)[0].values;
 
@@ -260,48 +229,62 @@ $(document).ready(function () {
                     var context = createNode(data, name, id, index);
 
                     context.appendTo('#files');
-                    context.find($('#node'+index+' .imagecontainer'))
-                        .append($('<div style="background-image: url('+pathsroot +'files'+ name+')"/>').attr('class','imagethumb'));
-                        //.append($('<img src="'+pathsroot +'files'+ name+'"/>').attr('class','imagethumb'));
-
+                    context.find($('#node' + index + ' .imagecontainer'))
+                        .append($('<div style="background-image: url(' + pathsroot + 'files' + name + ')"/>').attr('class', 'imagethumb'));
 
                     index++;
                 });
             },
-            error: function(res){
+            error: function (res) {
                 console.log(res);
             }
         });
     }
 
 
-    function createNode(data, name ,id, index){
+    //inserts a contentobject with image-ids to a hidden input field (to save it in the database)
+    function images2inputImageIds(res) {
+        var content = [];
+
+        $.each(res, function () {
+            content.push($(this)[0].id_slug);
+        });
+
+        var jsonString = JSON.stringify(content);
+
+        inputImageIds.val('{"content": ' + jsonString + '}');
+
+        $('#files').empty();
+        initialize();
+    }
+
+    //creates a imageobject node-container
+    function createNode(data, name, id, index) {
         var context = $('<div/>')
-                .attr('class', 'node')
-                .attr('id', 'node' + index)
-                .append($('<div/>').attr('class','imagecontainer'));
+            .attr('class', 'node')
+            .attr('id', 'node' + index)
+            .append($('<div/>').attr('class', 'imagecontainer'));
 
-        context.append($('<div/>').attr('class','metacontainer'))
-            .append('<input value="'+id+'" class="hiddenIdField" name="id['+index+']">');
+        context.append($('<div/>').attr('class', 'metacontainer'))
+            .append('<input value="' + id + '" class="hiddenIdField" name="id[' + index + ']">');
 
-        $.each(imagefields, function(title, fieldObj){
+        $.each(imagefields, function (title, fieldObj) {
             context.find('.metacontainer').append(getMetaFields(title, fieldObj, data));
         });
 
         //specific progress bar
-            context.find('.metacontainer').append('<div class="progressContainer"></div>');
+        context.find('.metacontainer').append('<div class="progressContainer"></div>');
         //specific button container
-            context.find('.metacontainer').append('<div class="btnContainer"></div>');
+        context.find('.metacontainer').append('<div class="btnContainer"></div>');
         //specific delete button
-            context.find('.btnContainer').append('<button title="Delete File" type="button" class="btn btn-small btn-danger btnDeleteFile"><i class="glyphicon glyphicon-trash"></i></button>');
+        context.find('.btnContainer').append('<button title="Delete File" type="button" class="btn btn-small btn-danger btnDeleteFile"><i class="glyphicon glyphicon-trash"></i></button>');
 
-        context.append($('<div/>').css('clear','both'));
-        context.data('file',data);
+        context.append($('<div/>').css('clear', 'both'));
+        context.data('file', data);
         return context;
     }
 
-
-    function getMetaFields(title, fieldObj, data){
+    function getMetaFields(title, fieldObj, data) {
         if (title != 'image') {
             var label = fieldObj.label != "" ? fieldObj.label : title;
             var value = (typeof data[title] !== 'undefined' ? data[title] : "");
@@ -311,22 +294,22 @@ $(document).ready(function () {
 
 
     function createCanvas($index) {
-        return function(e) {
+        return function (e) {
             var $img = $('<img>', {src: e.target.result});
             var canvas = $('#node' + $index).find('.canvasthumb')[0];
             var context = canvas.getContext('2d');
 
             $img.load(function () {
-                context.drawImage(this,0,0,120,100);
+                context.drawImage(this, 0, 0, 120, 100);
             });
         }
     }
 
 
-    function progressHandlingFunction($node){
-        return function(e) {
+    function progressHandlingFunction($node) {
+        return function (e) {
             if (e.lengthComputable) {
-                $('#'+$node+'_progress').attr({value: e.loaded, max: e.total});
+                $('#' + $node + '_progress').attr({value: e.loaded, max: e.total});
             }
         }
     }

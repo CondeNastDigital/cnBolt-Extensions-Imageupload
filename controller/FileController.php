@@ -53,6 +53,9 @@ class FileController implements ControllerProviderInterface
      */
     public function listContent($contenttype, $field, Request $request)
     {
+        if( !$this->app["users"]->isAllowed("edit") )
+            return $this->makeErrorResponse("Insufficient access rights!");
+
         // Load field config of containing page
         $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
         $field       = preg_replace("/[^a-z0-9\\-_]+/i", "", $field);
@@ -102,6 +105,8 @@ class FileController implements ControllerProviderInterface
      */
     public function storeContent($contenttype, $field, Request $request)
     {
+        if( !$this->app["users"]->isAllowed("edit") )
+            return $this->makeErrorResponse("Insufficient access rights!");
 
         // Load field config of containing page
         $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
@@ -187,6 +192,9 @@ class FileController implements ControllerProviderInterface
      */
     public function deleteContent($contenttype, $field, Request $request)
     {
+        if( !$this->app["users"]->isAllowed("edit") )
+            return $this->makeErrorResponse("Insufficient access rights!");
+
         // Load field config of containing page
         $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
         $field       = preg_replace("/[^a-z0-9\\-_]+/i", "", $field);
@@ -235,6 +243,9 @@ class FileController implements ControllerProviderInterface
      */
     public function iframe($contenttype, $field, Request $request)
     {
+        if( !$this->app["users"]->isAllowed("edit") )
+            return $this->makeErrorResponse("Insufficient access rights!");
+
         $parentFieldConfig = $this->getFieldConfig($contenttype, $field);
         $imageType = $parentFieldConfig["contenttype"];
 
@@ -258,7 +269,12 @@ class FileController implements ControllerProviderInterface
      * @return mixed
      * @throws \Exception
      */
-    protected function getFieldConfig($contenttype, $field){
+    protected function getFieldConfig($contenttype, $field)
+    {
+
+        if( !$this->app["users"]->isAllowed("edit") )
+            return $this->makeErrorResponse("Insufficient access rights!");
+
         $contenttype = $this->app['storage']->getContentType($contenttype);
 
         if(!$contenttype)
@@ -279,7 +295,8 @@ class FileController implements ControllerProviderInterface
      * @param $content
      * @return array
      */
-    protected function filterContent(Content $content){
+    protected function filterContent(Content $content)
+    {
 
         $out = array();
         $out["id"] = $content->id;
@@ -294,7 +311,18 @@ class FileController implements ControllerProviderInterface
         return $out;
     }
 
-    protected function storeFile(UploadedFile $file){
+    /**
+     * Stores the file in the filesystem
+     *
+     * @param $file
+     * @return mixed
+     * @throws \Exception
+     */
+    protected function storeFile(UploadedFile $file)
+    {
+        if( !$this->app["users"]->isAllowed("edit") )
+            return $this->makeErrorResponse("Insufficient access rights!");
+
         $basePath = $this->app["resources"]->getPath("filespath");
 
         $extension = $file->getClientOriginalExtension();
@@ -318,13 +346,25 @@ class FileController implements ControllerProviderInterface
         return "/".self::filesPath."/".$realFilename;
     }
 
-    protected function removeFile($path){
+    /**
+     * removes the file from the filesystem
+     *
+     * @param $path
+     * @return mixed
+     * @throws \Exception
+     */
+    protected function removeFile($path)
+    {
+
         $basePath = $this->app["resources"]->getPath("filespath");
         unlink($basePath.$path);
     }
 
-    public function before(){
-
+    private function makeErrorResponse( $message ) {
+        return new JsonResponse(array(
+            "status" => "error",
+            "message" => $message
+        ));
     }
 
 }
