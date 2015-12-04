@@ -28,7 +28,7 @@ Installing or updating via the Bolt admin interface is also possible but would r
 ## Configuration
 Add the following field for your content type (within `contenttype.yml`). Those fields are mandatory.
 ```
-myContenttype:
+mycontenttype: #all lowercase!
     name: Images   #Change here the displayname (plural)
     singular_name: Image   #Change here the displayname (singular)
     fields:   #add the fields you need in your content type (metainformations)
@@ -53,7 +53,7 @@ pages:
     fields:
         imageupload:
             type: imageupload
-            contenttype: myContenttype   #must be the same name as the new defined contenttype above
+            contenttype: mycontenttype   #must be the same name as the new defined contenttype above
 ```
 
 ## Usage
