@@ -25,7 +25,6 @@ class FileController implements ControllerProviderInterface
         $this->app = $app;
         $this->config = $config;
         $this->app['twig.loader.filesystem']->prependPath(__DIR__."/../twig");
-        $this->app->before(array($this, 'before'));
     }
 
     public function connect(\Silex\Application $app)
