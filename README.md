@@ -32,6 +32,9 @@ myContenttype:
     name: Images   #Change here the displayname (plural)
     singular_name: Image   #Change here the displayname (singular)
     fields:   #add the fields you need in your content type (metainformations)
+        title:  #mandatory
+            label: Name
+            type: text
         copyright:
             type: text
         author:
