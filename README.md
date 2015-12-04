@@ -53,7 +53,7 @@ pages:
     fields:
         imageupload:
             type: imageupload
-            contenttype: myContenttype   #must be the same name as the new defined contenttype above
+            contenttype: mycontenttype   #must be the same name as the new defined contenttype above
 ```
 
 ## Usage
