@@ -23,9 +23,7 @@ class Extension extends BaseExtension
     }
 
     public function initialize() {
-
         $this->config = $this->getConfig();
-        $this->app->before(array($this, 'before'));
         $this->app->mount('/imageupload', new FileController($this->app, $this->config));
     }
 
