@@ -26,6 +26,8 @@ $(document).ready(function () {
                 var context = createNode(data, name, "", index);
                 context.addClass('newFile');
 
+/* disabled because of a bug
+
                 //specific upload button
                 context.find('.btnContainer')
                     .append('<button title="Upload File" type="button" class="btn btn-small btn-primary btnUploadFile"><i class="glyphicon glyphicon-upload"></i></button>');
@@ -33,6 +35,8 @@ $(document).ready(function () {
                 //specific progress bar
                 context.find('.progressContainer')
                     .append('<progress value="0" max="100" id="node' + index + '_progress"></progress>');
+
+*/
 
                 context.prependTo('#files');
 
@@ -138,8 +142,10 @@ $(document).ready(function () {
         }
     });
 
-
-    // Click SpecificUploadFile Button
+/* disabled because of a bug
+* if you upload a file using the single upload button and you click then on the upload all / save button, the file will be uploaded twice
+*
+     // Click SpecificUploadFile Button
     $(document).on('click', '.btnUploadFile', function () {
         var button = $(this);
         var parent = $(this).closest('div[id]');
@@ -203,7 +209,7 @@ $(document).ready(function () {
             }
         })
     });
-
+*/
 
     //first initial loading of linked imageObjects while loading a new or present page
     function initialize() {
@@ -272,8 +278,13 @@ $(document).ready(function () {
             context.find('.metacontainer').append(getMetaFields(title, fieldObj, data));
         });
 
+
+/* disabled because of the single upload button bug
+
         //specific progress bar
         context.find('.metacontainer').append('<div class="progressContainer"></div>');
+*/
+
         //specific button container
         context.find('.metacontainer').append('<div class="btnContainer"></div>');
         //specific delete button
