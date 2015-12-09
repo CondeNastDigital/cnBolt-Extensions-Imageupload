@@ -21,7 +21,7 @@ Bolt Extension to upload multiple Files (Images) with metainformations
 ```
 2.) Change to the extensions folder and install via composer.
 ```
-composer require cnd/imageupload
+composer require cnd/imageupload --prefer-dist
 ```
 Installing or updating via the Bolt admin interface is also possible but would require the web-server's user to have proper access to the GitHup repository. This is usually not the case.
 
