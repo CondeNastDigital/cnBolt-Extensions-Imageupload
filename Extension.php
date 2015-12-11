@@ -5,7 +5,6 @@ namespace Bolt\Extension\CND\ImageUpload;
 use Bolt\Application;
 use Bolt\BaseExtension;
 use Bolt\Extension\CND\ImageUpload\Controller\FileController;
-use Bolt\Extensions\ImageUpload\ImageUploadField;
 
 class Extension extends BaseExtension
 {
