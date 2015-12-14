@@ -1,6 +1,6 @@
 <?php
 
-namespace Bolt\Extensions\ImageUpload;
+namespace Bolt\Extension\CND\ImageUpload;
 
 use Bolt\Field\FieldInterface;
 
