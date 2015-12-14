@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Filesystem\Filesystem;
 
 class FileController implements ControllerProviderInterface
 {
@@ -339,6 +340,9 @@ class FileController implements ControllerProviderInterface
             $counter++;
             $realFilename = $filename."-".$counter.".".$extension;
         }
+
+        $fs = new Filesystem();
+        $fs->mkdir($basePath."/".self::filesPath, 0755);
 
         $file->move($basePath."/".self::filesPath, $realFilename);
 
