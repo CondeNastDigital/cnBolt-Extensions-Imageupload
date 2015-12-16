@@ -53,6 +53,7 @@ class FileController implements ControllerProviderInterface
      */
     public function listContent($contenttype, $field, Request $request)
     {
+
         if( !$this->app["users"]->isAllowed("edit") )
             return $this->makeErrorResponse("Insufficient access rights!");
 
@@ -83,11 +84,20 @@ class FileController implements ControllerProviderInterface
                 $result = $result instanceof Content ? array($result) : $result; // Bolt returns either array of Content or one single Content depending on number of results -.-
 
                 foreach ($result as $content)
-                    $contentList[] = $this->filterContent($content);
+                    $contentList[$content->id] = $this->filterContent($content);
+            }
+
+            // Sort by $ids
+            $sortedList = array();
+            foreach($ids as $order){
+                if( isset($contentList[$order]) ) {
+                    $sortedList[] = $contentList[$order];
+                    #unset($contentList[$id]);
+                }
             }
         }
 
-        return new JsonResponse($contentList);
+        return new JsonResponse($sortedList);
     }
 
     /**
@@ -147,6 +157,7 @@ class FileController implements ControllerProviderInterface
 
             // set file
             $fileField = "file_".$idx;
+
             if($request->files->has($fileField)){
                 // Delete old file if neccessary
                 $current = $element->get("image");
@@ -154,6 +165,7 @@ class FileController implements ControllerProviderInterface
                     $this->removeFile($current["file"]);
                 }
                 // Store new file
+
                 $file = $this->storeFile($request->files->get($fileField));
                 $element->setValue("image", array("file" => $file ));
             }
@@ -164,18 +176,27 @@ class FileController implements ControllerProviderInterface
 
         // Return current items
         $contentList = array();
+
         if($ids) {
             $result = $this->app['storage']->getContent($imageType, array("id" => implode(" || ", $ids)));
-
             if ($result) {
                 $result = $result instanceof Content ? array($result) : $result; // Bolt returns either array of Content or one single Content depending on number of results -.-
 
                 foreach ($result as $content)
-                    $contentList[] = $this->filterContent($content);
+                    $contentList[$content->id] = $this->filterContent($content);
+            }
+
+            // Sort by $ids
+            $sortedList = array();
+            foreach($ids as $order){
+                if( isset($contentList[$order]) ) {
+                    $sortedList[] = $contentList[$order];
+                    #unset($contentList[$id]);
+                }
             }
         }
 
-        return new JsonResponse($contentList);
+        return new JsonResponse($sortedList);
     }
 
     /**

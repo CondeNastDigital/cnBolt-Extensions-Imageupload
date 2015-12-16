@@ -10,6 +10,29 @@ $(document).ready(function () {
     initialize();
 
 
+    // Selectable
+    $('#files').sortable({
+        stop: function(){
+            var nodes = $('#metaFields').find('#files').find('div.node');
+            if (nodes.length > 0) {
+                $.each(nodes, function (i) {
+                    $(this).attr('id','node'+i);
+                    $(this).find("input[name^=id]").attr('name','id['+i+']');
+
+                    var pNodes = $(this).find('.metacontainer').children('p');
+                    var metafield;
+                    $.each(pNodes, function(){
+                        var label = ($(this).find('label'));
+                        metafield = label.attr('class');
+                        $(this).find("input[name^=value]").attr('name','value['+i+']['+metafield+']');
+                    });
+
+                });
+            }
+        }
+    }).disableSelection();
+
+
     // Click AddFiles Button
     nodeFileupload.find('#btnAddFiles')
         .on('change', function () {
@@ -90,7 +113,6 @@ $(document).ready(function () {
                     processData: false,
                     contentType: false,
                     success: function (res) {
-
                         images2inputImageIds(res);
                         nodeFileupload.find('.infotext').addClass('bg-success').text('All Files have been saved successfully!');
 
@@ -265,6 +287,7 @@ $(document).ready(function () {
     }
 
     //creates a imageobject node-container
+    //adds a node on top of the imagelist with a new consecutive id
     function createNode(data, name, id, index) {
         var context = $('<div/>')
             .attr('class', 'node')
