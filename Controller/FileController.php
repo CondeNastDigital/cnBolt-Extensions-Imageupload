@@ -53,14 +53,13 @@ class FileController implements ControllerProviderInterface
      */
     public function listContent($contenttype, $field, Request $request)
     {
-
-        if( !$this->app["users"]->isAllowed("edit") )
-            return $this->makeErrorResponse("Insufficient access rights!");
-
         // Load field config of containing page
         $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
         $field       = preg_replace("/[^a-z0-9\\-_]+/i", "", $field);
         $data        = json_decode($request->getContent(), true);
+
+        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
+            return $this->makeErrorResponse("Insufficient access rights!");
 
         $fieldConfig = $this->getFieldConfig($contenttype, $field);
         $imageType = $fieldConfig["contenttype"];
@@ -115,12 +114,12 @@ class FileController implements ControllerProviderInterface
      */
     public function storeContent($contenttype, $field, Request $request)
     {
-        if( !$this->app["users"]->isAllowed("edit") )
-            return $this->makeErrorResponse("Insufficient access rights!");
-
         // Load field config of containing page
         $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
         $field       = preg_replace("/[^a-z0-9\\-_]+/i", "", $field);
+
+        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
+            return $this->makeErrorResponse("Insufficient access rights!");
 
         $fieldConfig = $this->getFieldConfig($contenttype, $field);
         $imageType = $fieldConfig["contenttype"];
@@ -213,13 +212,14 @@ class FileController implements ControllerProviderInterface
      */
     public function deleteContent($contenttype, $field, Request $request)
     {
-        if( !$this->app["users"]->isAllowed("edit") )
-            return $this->makeErrorResponse("Insufficient access rights!");
 
         // Load field config of containing page
         $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
         $field       = preg_replace("/[^a-z0-9\\-_]+/i", "", $field);
         $data        = json_decode($request->getContent(), true);
+
+        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
+            return $this->makeErrorResponse("Insufficient access rights!");
 
         $fieldConfig = $this->getFieldConfig($contenttype, $field);
         $imageType = $fieldConfig["contenttype"];
@@ -264,19 +264,20 @@ class FileController implements ControllerProviderInterface
      */
     public function iframe($contenttype, $field, Request $request)
     {
-        if( !$this->app["users"]->isAllowed("edit") )
-            return $this->makeErrorResponse("Insufficient access rights!");
 
         $parentFieldConfig = $this->getFieldConfig($contenttype, $field);
         $imageType = $parentFieldConfig["contenttype"];
 
+        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
+            return $this->makeErrorResponse("Insufficient access rights!");
+
         $imageConfig = $this->app['storage']->getContentType($imageType);
 
         $rendered = $this->app['render']->render('iframeUpload.twig',array(
-            'config' => $this->config,
-            'contenttype' => $contenttype,
-            'field' => $field,
-            'imagefields' => $imageConfig['fields'],
+                'config' => $this->config,
+                'contenttype' => $contenttype,
+                'field' => $field,
+                'imagefields' => $imageConfig['fields'],
             )
         );
 
@@ -293,10 +294,10 @@ class FileController implements ControllerProviderInterface
     protected function getFieldConfig($contenttype, $field)
     {
 
-        if( !$this->app["users"]->isAllowed("edit") )
-            return $this->makeErrorResponse("Insufficient access rights!");
-
         $contenttype = $this->app['storage']->getContentType($contenttype);
+
+        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
+            return $this->makeErrorResponse("Insufficient access rights!");
 
         if(!$contenttype)
             return false;
@@ -341,8 +342,6 @@ class FileController implements ControllerProviderInterface
      */
     protected function storeFile(UploadedFile $file)
     {
-        if( !$this->app["users"]->isAllowed("edit") )
-            return $this->makeErrorResponse("Insufficient access rights!");
 
         $basePath = $this->app["resources"]->getPath("filespath");
 
