@@ -322,7 +322,7 @@ $(document).ready(function () {
         if (title != 'image') {
             var label = fieldObj.label != "" ? fieldObj.label : title;
             var value = (typeof data[title] !== 'undefined' ? data[title] : "");
-            return '<p><label class="' + title + '" style="text-transform:capitalize; width:75px;float:left;">' + label + ':</label> <input value="' + value + '" name="value[' + index + '][' + title + ']" type="text"/></p>';
+            return '<p><label class="' + title + '" style="text-transform:capitalize; width:75px;float:left;">' + label + ':</label> <input value="' + value.replace(/"/,"&quot;") + '" name="value[' + index + '][' + title + ']" type="text"/></p>';
         }
     }
 
