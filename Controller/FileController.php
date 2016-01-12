@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Filesystem\Filesystem;
 
 class FileController implements ControllerProviderInterface
 {
@@ -52,13 +53,13 @@ class FileController implements ControllerProviderInterface
      */
     public function listContent($contenttype, $field, Request $request)
     {
-        if( !$this->app["users"]->isAllowed("edit") )
-            return $this->makeErrorResponse("Insufficient access rights!");
-
         // Load field config of containing page
         $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
         $field       = preg_replace("/[^a-z0-9\\-_]+/i", "", $field);
         $data        = json_decode($request->getContent(), true);
+
+        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
+            return $this->makeErrorResponse("Insufficient access rights!");
 
         $fieldConfig = $this->getFieldConfig($contenttype, $field);
         $imageType = $fieldConfig["contenttype"];
@@ -82,11 +83,20 @@ class FileController implements ControllerProviderInterface
                 $result = $result instanceof Content ? array($result) : $result; // Bolt returns either array of Content or one single Content depending on number of results -.-
 
                 foreach ($result as $content)
-                    $contentList[] = $this->filterContent($content);
+                    $contentList[$content->id] = $this->filterContent($content);
+            }
+
+            // Sort by $ids
+            $sortedList = array();
+            foreach($ids as $order){
+                if( isset($contentList[$order]) ) {
+                    $sortedList[] = $contentList[$order];
+                    #unset($contentList[$id]);
+                }
             }
         }
 
-        return new JsonResponse($contentList);
+        return new JsonResponse($sortedList);
     }
 
     /**
@@ -104,12 +114,12 @@ class FileController implements ControllerProviderInterface
      */
     public function storeContent($contenttype, $field, Request $request)
     {
-        if( !$this->app["users"]->isAllowed("edit") )
-            return $this->makeErrorResponse("Insufficient access rights!");
-
         // Load field config of containing page
         $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
         $field       = preg_replace("/[^a-z0-9\\-_]+/i", "", $field);
+
+        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
+            return $this->makeErrorResponse("Insufficient access rights!");
 
         $fieldConfig = $this->getFieldConfig($contenttype, $field);
         $imageType = $fieldConfig["contenttype"];
@@ -146,6 +156,7 @@ class FileController implements ControllerProviderInterface
 
             // set file
             $fileField = "file_".$idx;
+
             if($request->files->has($fileField)){
                 // Delete old file if neccessary
                 $current = $element->get("image");
@@ -153,6 +164,7 @@ class FileController implements ControllerProviderInterface
                     $this->removeFile($current["file"]);
                 }
                 // Store new file
+
                 $file = $this->storeFile($request->files->get($fileField));
                 $element->setValue("image", array("file" => $file ));
             }
@@ -163,18 +175,27 @@ class FileController implements ControllerProviderInterface
 
         // Return current items
         $contentList = array();
+
         if($ids) {
             $result = $this->app['storage']->getContent($imageType, array("id" => implode(" || ", $ids)));
-
             if ($result) {
                 $result = $result instanceof Content ? array($result) : $result; // Bolt returns either array of Content or one single Content depending on number of results -.-
 
                 foreach ($result as $content)
-                    $contentList[] = $this->filterContent($content);
+                    $contentList[$content->id] = $this->filterContent($content);
+            }
+
+            // Sort by $ids
+            $sortedList = array();
+            foreach($ids as $order){
+                if( isset($contentList[$order]) ) {
+                    $sortedList[] = $contentList[$order];
+                    #unset($contentList[$id]);
+                }
             }
         }
 
-        return new JsonResponse($contentList);
+        return new JsonResponse($sortedList);
     }
 
     /**
@@ -191,13 +212,14 @@ class FileController implements ControllerProviderInterface
      */
     public function deleteContent($contenttype, $field, Request $request)
     {
-        if( !$this->app["users"]->isAllowed("edit") )
-            return $this->makeErrorResponse("Insufficient access rights!");
 
         // Load field config of containing page
         $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
         $field       = preg_replace("/[^a-z0-9\\-_]+/i", "", $field);
         $data        = json_decode($request->getContent(), true);
+
+        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
+            return $this->makeErrorResponse("Insufficient access rights!");
 
         $fieldConfig = $this->getFieldConfig($contenttype, $field);
         $imageType = $fieldConfig["contenttype"];
@@ -242,19 +264,20 @@ class FileController implements ControllerProviderInterface
      */
     public function iframe($contenttype, $field, Request $request)
     {
-        if( !$this->app["users"]->isAllowed("edit") )
-            return $this->makeErrorResponse("Insufficient access rights!");
 
         $parentFieldConfig = $this->getFieldConfig($contenttype, $field);
         $imageType = $parentFieldConfig["contenttype"];
 
+        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
+            return $this->makeErrorResponse("Insufficient access rights!");
+
         $imageConfig = $this->app['storage']->getContentType($imageType);
 
         $rendered = $this->app['render']->render('iframeUpload.twig',array(
-            'config' => $this->config,
-            'contenttype' => $contenttype,
-            'field' => $field,
-            'imagefields' => $imageConfig['fields'],
+                'config' => $this->config,
+                'contenttype' => $contenttype,
+                'field' => $field,
+                'imagefields' => $imageConfig['fields'],
             )
         );
 
@@ -271,10 +294,10 @@ class FileController implements ControllerProviderInterface
     protected function getFieldConfig($contenttype, $field)
     {
 
-        if( !$this->app["users"]->isAllowed("edit") )
-            return $this->makeErrorResponse("Insufficient access rights!");
-
         $contenttype = $this->app['storage']->getContentType($contenttype);
+
+        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
+            return $this->makeErrorResponse("Insufficient access rights!");
 
         if(!$contenttype)
             return false;
@@ -319,8 +342,6 @@ class FileController implements ControllerProviderInterface
      */
     protected function storeFile(UploadedFile $file)
     {
-        if( !$this->app["users"]->isAllowed("edit") )
-            return $this->makeErrorResponse("Insufficient access rights!");
 
         $basePath = $this->app["resources"]->getPath("filespath");
 
@@ -339,6 +360,9 @@ class FileController implements ControllerProviderInterface
             $counter++;
             $realFilename = $filename."-".$counter.".".$extension;
         }
+
+        $fs = new Filesystem();
+        $fs->mkdir($basePath."/".self::filesPath, 0755);
 
         $file->move($basePath."/".self::filesPath, $realFilename);
 
