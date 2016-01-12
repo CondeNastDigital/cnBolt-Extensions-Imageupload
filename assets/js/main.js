@@ -2,12 +2,35 @@ $(document).ready(function () {
 
     var index;
     var nodeFileupload = $('#fileupload');
-    var storeUrl = pathsroot + 'imageupload/store/' + parentContenttype + '/' + parentField;
-    var listUrl = pathsroot + 'imageupload/list/' + parentContenttype + '/' + parentField;
-    var deleteUrl = pathsroot + 'imageupload/delete/' + parentContenttype + '/' + parentField;
+    var storeUrl = pathsroot + 'bolt/imageupload/store/' + parentContenttype + '/' + parentField;
+    var listUrl = pathsroot + 'bolt/imageupload/list/' + parentContenttype + '/' + parentField;
+    var deleteUrl = pathsroot + 'bolt/imageupload/delete/' + parentContenttype + '/' + parentField;
     var inputImageIds = $('input#imageupload', parent.document);
 
     initialize();
+
+
+    // Selectable
+    $('#files').sortable({
+        stop: function(){
+            var nodes = $('#metaFields').find('#files').find('div.node');
+            if (nodes.length > 0) {
+                $.each(nodes, function (i) {
+                    $(this).attr('id','node'+i);
+                    $(this).find("input[name^=id]").attr('name','id['+i+']');
+
+                    var pNodes = $(this).find('.metacontainer').children('p');
+                    var metafield;
+                    $.each(pNodes, function(){
+                        var label = ($(this).find('label'));
+                        metafield = label.attr('class');
+                        $(this).find("input[name^=value]").attr('name','value['+i+']['+metafield+']');
+                    });
+
+                });
+            }
+        }
+    }).disableSelection();
 
 
     // Click AddFiles Button
@@ -90,7 +113,6 @@ $(document).ready(function () {
                     processData: false,
                     contentType: false,
                     success: function (res) {
-
                         images2inputImageIds(res);
                         nodeFileupload.find('.infotext').addClass('bg-success').text('All Files have been saved successfully!');
 
@@ -265,6 +287,7 @@ $(document).ready(function () {
     }
 
     //creates a imageobject node-container
+    //adds a node on top of the imagelist with a new consecutive id
     function createNode(data, name, id, index) {
         var context = $('<div/>')
             .attr('class', 'node')
@@ -299,7 +322,7 @@ $(document).ready(function () {
         if (title != 'image') {
             var label = fieldObj.label != "" ? fieldObj.label : title;
             var value = (typeof data[title] !== 'undefined' ? data[title] : "");
-            return '<p><label class="' + title + '" style="text-transform:capitalize; width:75px;float:left;">' + label + ':</label> <input value="' + value + '" name="value[' + index + '][' + title + ']" type="text"/></p>';
+            return '<p><label class="' + title + '" style="text-transform:capitalize; width:75px;float:left;">' + label + ':</label> <input value="' + value.replace(/"/,"&quot;") + '" name="value[' + index + '][' + title + ']" type="text"/></p>';
         }
     }
 
