@@ -40,26 +40,26 @@ $(document).ready(function () {
 
             $.each(files, function (i, data) {
 
-                var imageType = /image.*/;
+                //var imageType = /image.*/;
                 var name = data.name;
 
-                if (!data.type.match(imageType))
-                    return;
+                //if (!data.type.match(imageType))
+                //    return;
 
                 var context = createNode(data, name, "", index);
                 context.addClass('newFile');
 
-/* disabled because of a bug
+                /* disabled because of a bug
 
-                //specific upload button
-                context.find('.btnContainer')
-                    .append('<button title="Upload File" type="button" class="btn btn-small btn-primary btnUploadFile"><i class="glyphicon glyphicon-upload"></i></button>');
+                 //specific upload button
+                 context.find('.btnContainer')
+                 .append('<button title="Upload File" type="button" class="btn btn-small btn-primary btnUploadFile"><i class="glyphicon glyphicon-upload"></i></button>');
 
-                //specific progress bar
-                context.find('.progressContainer')
-                    .append('<progress value="0" max="100" id="node' + index + '_progress"></progress>');
+                 //specific progress bar
+                 context.find('.progressContainer')
+                 .append('<progress value="0" max="100" id="node' + index + '_progress"></progress>');
 
-*/
+                 */
 
                 context.prependTo('#files');
 
@@ -117,9 +117,13 @@ $(document).ready(function () {
                         nodeFileupload.find('.infotext').addClass('bg-success').text('All Files have been saved successfully!');
 
                     },
-                    error: function (err) {
-                        console.log(err);
-                        nodeFileupload.find('.infotext').addClass('bg-danger').text('An error has occurred! Please try again later');
+                    error: function(xhr) {
+                        try {
+                            var json = $.parseJSON(xhr.responseText);
+                            alert('[Extension::Multimageupload] ' + json.status +' : '+ json.message);
+                        } catch(e) {
+                            alert('something bad happened');
+                        }
                     }
                 })
             }
@@ -156,82 +160,88 @@ $(document).ready(function () {
                 data: JSON.stringify(jsonObj),
                 type: "POST",
                 success: function (res) {
-
                     images2inputImageIds(res);
+                },
+                error: function(xhr) {
+                    try {
+                        var json = $.parseJSON(xhr.responseText);
+                        alert('[Extension::Multimageupload] ' + json.status +' : '+ json.message);
+                    } catch(e) {
+                        alert('something bad happened');
+                    }
                 }
-
             });
         }
     });
 
-/* disabled because of a bug
-* if you upload a file using the single upload button and you click then on the upload all / save button, the file will be uploaded twice
-*
+    /* disabled because of a bug
+     * if you upload a file using the single upload button and you click then on the upload all / save button, the file will be uploaded twice
+     *
      // Click SpecificUploadFile Button
-    $(document).on('click', '.btnUploadFile', function () {
-        var button = $(this);
-        var parent = $(this).closest('div[id]');
-        var data = new FormData();
+     $(document).on('click', '.btnUploadFile', function () {
+     var button = $(this);
+     var parent = $(this).closest('div[id]');
+     var data = new FormData();
 
-        var node = parent.attr('id');
-        var id = node.replace('node', '');
-        var file = parent.data('file');
+     var node = parent.attr('id');
+     var id = node.replace('node', '');
+     var file = parent.data('file');
 
-        var metaFields = $('#metaFields').find('#node' + id).find('input');
+     var metaFields = $('#metaFields').find('#node' + id).find('input');
 
-        if (file instanceof File) {
-            data.append('file_' + id, file);
-        }
+     if (file instanceof File) {
+     data.append('file_' + id, file);
+     }
 
-        $.each(metaFields, function () {
-            var key = ($(this).attr('name'));
-            var value = ($(this).val());
+     $.each(metaFields, function () {
+     var key = ($(this).attr('name'));
+     var value = ($(this).val());
 
-            data.append(key, value);
-        });
+     data.append(key, value);
+     });
 
-        $.ajax({
-            url: storeUrl,
-            type: 'POST',
-            xhr: function () {
-                var myXhr = $.ajaxSettings.xhr();
-                if (myXhr.upload) {
-                    myXhr.upload.addEventListener('progress', progressHandlingFunction(node), false);
-                }
-                return myXhr;
-            },
-            data: data,
-            processData: false,
-            contentType: false,
-            success: function (res) {
+     $.ajax({
+     url: storeUrl,
+     type: 'POST',
+     xhr: function () {
+     var myXhr = $.ajaxSettings.xhr();
+     if (myXhr.upload) {
+     myXhr.upload.addEventListener('progress', progressHandlingFunction(node), false);
+     }
+     return myXhr;
+     },
+     data: data,
+     processData: false,
+     contentType: false,
+     success: function (res) {
 
-                var jsonObj = $.parseJSON(inputImageIds.val());
-                var contentObject = jsonObj.content;
+     var jsonObj = $.parseJSON(inputImageIds.val());
+     var contentObject = jsonObj.content;
 
-                $.each(res, function () {
-                    contentObject.push($(this)[0].id_slug);
-                });
+     $.each(res, function () {
+     contentObject.push($(this)[0].id_slug);
+     });
 
-                var jsonString = JSON.stringify(contentObject);
+     var jsonString = JSON.stringify(contentObject);
 
-                inputImageIds.val('{"content": ' + jsonString + '}');
+     inputImageIds.val('{"content": ' + jsonString + '}');
 
-                button.addClass('btn-success').removeClass('btn-primary btn-danger btnUploadFile');
-                button.find('.glyphicon-upload').addClass('glyphicon-ok').removeClass('glyphicon-upload glyphicon-remove');
-                $('#' + node).addClass('success').removeClass('error newFile').find('button.btnDeleteFile').remove();
+     button.addClass('btn-success').removeClass('btn-primary btn-danger btnUploadFile');
+     button.find('.glyphicon-upload').addClass('glyphicon-ok').removeClass('glyphicon-upload glyphicon-remove');
+     $('#' + node).addClass('success').removeClass('error newFile').find('button.btnDeleteFile').remove();
 
-                nodeFileupload.find('.infotext').removeClass('bg-success bg-danger').text('');
+     nodeFileupload.find('.infotext').removeClass('bg-success bg-danger').text('');
 
-            },
-            error: function (err) {
-                console.log(err.responseText);
-                button.addClass('btn-danger').removeClass('btn-primary');
-                button.find('.glyphicon-upload').addClass('glyphicon-remove');
-                $('#' + node).addClass('error');
-            }
-        })
-    });
-*/
+     },
+     error: function (err) {
+     console.log(err.responseText);
+     button.addClass('btn-danger').removeClass('btn-primary');
+     button.find('.glyphicon-upload').addClass('glyphicon-remove');
+     $('#' + node).addClass('error');
+     }
+     })
+     });
+     */
 
     //first initial loading of linked imageObjects while loading a new or present page
     function initialize() {
@@ -263,8 +273,13 @@ $(document).ready(function () {
                     index++;
                 });
             },
-            error: function (res) {
-                console.log(res);
+            error: function(xhr) {
+                try {
+                    var json = $.parseJSON(xhr.responseText);
+                    alert('[Extension::Multimageupload] ' + json.status +' : '+ json.message);
+                } catch(e) {
+                    alert('something bad happened');
+                }
             }
         });
     }
@@ -302,11 +317,11 @@ $(document).ready(function () {
         });
 
 
-/* disabled because of the single upload button bug
+        /* disabled because of the single upload button bug
 
-        //specific progress bar
-        context.find('.metacontainer').append('<div class="progressContainer"></div>');
-*/
+         //specific progress bar
+         context.find('.metacontainer').append('<div class="progressContainer"></div>');
+         */
 
         //specific button container
         context.find('.metacontainer').append('<div class="btnContainer"></div>');
