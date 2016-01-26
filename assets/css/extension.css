@@ -23,17 +23,23 @@
     position: relative;
 }
 
-#metaFields label{
-    font-size: 13px;
-    padding: 6px 0;
+#metaFields p {
+    display: block;
+    position: relative;
+    margin-bottom: 1px;
 }
 
-#metaFields input{
+#metaFields label{
+    font-size: 13px;
+    display: block;
+    width: 25%;
+}
+
+#metaFields input,textarea {
     border-radius: 2px;
     border: 1px solid #CCC;
-    font-size: 15px;
     box-shadow: inset 0 1px 1px rgba(0,0,0,0.075);
-    padding: 6px 12px;
+    width: 72%;
 }
 
 #metaFields .node{
@@ -56,12 +62,14 @@
 
 #metaFields .metacontainer .btnContainer{
     position: absolute;
-    top: 20px;
+    top: 0;
     right: 0;
 }
-
-#metaFields .imagecontainer,
 #metaFields .metacontainer{
+    margin-right: 45px;
+    margin-left: 125px;
+}
+#metaFields .imagecontainer{
     float: left;
     margin-right: 10px;
 }
