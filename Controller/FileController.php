@@ -53,50 +53,54 @@ class FileController implements ControllerProviderInterface
      */
     public function listContent($contenttype, $field, Request $request)
     {
-        // Load field config of containing page
-        $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
-        $field       = preg_replace("/[^a-z0-9\\-_]+/i", "", $field);
-        $data        = json_decode($request->getContent(), true);
+        try{
+            // Load field config of containing page
+            $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
+            $field       = preg_replace("/[^a-z0-9\\-_]+/i", "", $field);
+            $data        = json_decode($request->getContent(), true);
 
-        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
-            return $this->makeErrorResponse("Insufficient access rights!");
+            if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
+                throw new \Exception ("Insufficient access rights");
 
-        $fieldConfig = $this->getFieldConfig($contenttype, $field);
-        $imageType = $fieldConfig["contenttype"];
+            $fieldConfig = $this->getFieldConfig($contenttype, $field);
+            $imageType = $fieldConfig["contenttype"];
 
-        // parse id slugs into id only array (Bolt has no "fetch multiple slugs" method, only a "fetch multiple ids" method)
-        $ids = array();
-        if(isset($data["content"]) && is_array($data["content"]))
-            foreach($data["content"] as $slug){
-                list($type, $id) = explode("/", $slug);
-                if($type == $imageType && is_numeric($id))
-                    $ids[] = $id;
-            }
+            // parse id slugs into id only array (Bolt has no "fetch multiple slugs" method, only a "fetch multiple ids" method)
+            $ids = array();
+            if(isset($data["content"]) && is_array($data["content"]))
+                foreach($data["content"] as $slug){
+                    list($type, $id) = explode("/", $slug);
+                    if($type == $imageType && is_numeric($id))
+                        $ids[] = $id;
+                }
 
-        $contentList = array();
+            $contentList = array();
 
-        // Load all linked images and make them suitable for output
-        if($ids) {
-            $result = $this->app['storage']->getContent($imageType, array("id" => implode(" || ", $ids)));
+            // Load all linked images and make them suitable for output
+            if($ids) {
+                $result = $this->app['storage']->getContent($imageType, array("id" => implode(" || ", $ids)));
 
-            if ($result) {
-                $result = $result instanceof Content ? array($result) : $result; // Bolt returns either array of Content or one single Content depending on number of results -.-
+                if ($result) {
+                    $result = $result instanceof Content ? array($result) : $result; // Bolt returns either array of Content or one single Content depending on number of results -.-
 
-                foreach ($result as $content)
-                    $contentList[$content->id] = $this->filterContent($content);
-            }
+                    foreach ($result as $content)
+                        $contentList[$content->id] = $this->filterContent($content);
+                }
 
-            // Sort by $ids
-            $sortedList = array();
-            foreach($ids as $order){
-                if( isset($contentList[$order]) ) {
-                    $sortedList[] = $contentList[$order];
-                    #unset($contentList[$id]);
+                // Sort by $ids
+                $sortedList = array();
+                foreach($ids as $order){
+                    if( isset($contentList[$order]) ) {
+                        $sortedList[] = $contentList[$order];
+                        #unset($contentList[$id]);
+                    }
                 }
             }
-        }
+            return new JsonResponse($sortedList);
 
-        return new JsonResponse($sortedList);
+        } catch(\Exception $ex) {
+            return $this->makeErrorResponse($ex->getMessage());
+        }
     }
 
     /**
@@ -114,88 +118,91 @@ class FileController implements ControllerProviderInterface
      */
     public function storeContent($contenttype, $field, Request $request)
     {
-        // Load field config of containing page
-        $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
-        $field       = preg_replace("/[^a-z0-9\\-_]+/i", "", $field);
+        try {
+            // Load field config of containing page
+            $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
+            $field = preg_replace("/[^a-z0-9\\-_]+/i", "", $field);
 
-        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
-            return $this->makeErrorResponse("Insufficient access rights!");
+            if (!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
+                throw new \Exception ("Insufficient access rights");
 
-        $fieldConfig = $this->getFieldConfig($contenttype, $field);
-        $imageType = $fieldConfig["contenttype"];
+            $fieldConfig = $this->getFieldConfig($contenttype, $field);
+            $imageType = $fieldConfig["contenttype"];
 
-        // process all elements from form
-        $values = $request->get("value", array());
-        $ids = $request->get("id", array());
+            // process all elements from form
+            $values = $request->get("value", array());
+            $ids = $request->get("id", array());
 
-        foreach($ids as $idx => &$id){
-            $id = (int)$id;
-            $idx = (int)$idx;
+            foreach ($ids as $idx => &$id) {
+                $id = (int)$id;
+                $idx = (int)$idx;
 
-            // Get element from DB if present or create a new one
-            /* @var Content $element */
-            if($id) {
-                $element = $this->app["storage"]->getContent($imageType, array("id" => $id, "return_single" => true));
-                if(!$element)
-                    throw new \Exception("Failed to get contenttype '$contenttype' and id '$id''");
-            }
-            else {
-                $element = $this->app["storage"]->getContentObject($imageType);
-                if(!$element)
-                    throw new \Exception("Failed to create contenttype '$contenttype''");
+                // Get element from DB if present or create a new one
+                /* @var Content $element */
+                if ($id) {
+                    $element = $this->app["storage"]->getContent($imageType, array("id" => $id, "return_single" => true));
+                    if (!$element)
+                        throw new \Exception("Failed to get contenttype '$contenttype' and id '$id''");
+                } else {
+                    $element = $this->app["storage"]->getContentObject($imageType);
+                    if (!$element)
+                        throw new \Exception("Failed to create contenttype '$contenttype''");
 
-                $element->setValue("datepublish", date("Y-m-d H:i:s"));
-                $element->setValue("status", "published");
-            }
-
-            // update values
-            $elementValues = isset($values[$idx]) ? $values[$idx] : array();
-            foreach($elementValues as $key => $value){
-                $element->setValue($key, $value);
-            }
-
-            // set file
-            $fileField = "file_".$idx;
-
-            if($request->files->has($fileField)){
-                // Delete old file if neccessary
-                $current = $element->get("image");
-                if(isset($current["file"])){
-                    $this->removeFile($current["file"]);
+                    $element->setValue("datepublish", date("Y-m-d H:i:s"));
+                    $element->setValue("status", "published");
                 }
-                // Store new file
 
-                $file = $this->storeFile($request->files->get($fileField));
-                $element->setValue("image", array("file" => $file ));
+                // update values
+                $elementValues = isset($values[$idx]) ? $values[$idx] : array();
+                foreach ($elementValues as $key => $value) {
+                    $element->setValue($key, $value);
+                }
+
+                // set file
+                $fileField = "file_" . $idx;
+
+                if ($request->files->has($fileField)) {
+                    // Delete old file if neccessary
+                    $current = $element->get("image");
+                    if (isset($current["file"])) {
+                        $this->removeFile($current["file"]);
+                    }
+                    // Store new file
+
+                    $file = $this->storeFile($request->files->get($fileField));
+                    $element->setValue("image", array("file" => $file));
+                }
+
+                // Store content
+                $id = $this->app["storage"]->saveContent($element);
             }
 
-            // Store content
-            $id = $this->app["storage"]->saveContent($element);
-        }
+            // Return current items
+            $contentList = array();
 
-        // Return current items
-        $contentList = array();
+            if ($ids) {
+                $result = $this->app['storage']->getContent($imageType, array("id" => implode(" || ", $ids)));
+                if ($result) {
+                    $result = $result instanceof Content ? array($result) : $result; // Bolt returns either array of Content or one single Content depending on number of results -.-
 
-        if($ids) {
-            $result = $this->app['storage']->getContent($imageType, array("id" => implode(" || ", $ids)));
-            if ($result) {
-                $result = $result instanceof Content ? array($result) : $result; // Bolt returns either array of Content or one single Content depending on number of results -.-
+                    foreach ($result as $content)
+                        $contentList[$content->id] = $this->filterContent($content);
+                }
 
-                foreach ($result as $content)
-                    $contentList[$content->id] = $this->filterContent($content);
-            }
-
-            // Sort by $ids
-            $sortedList = array();
-            foreach($ids as $order){
-                if( isset($contentList[$order]) ) {
-                    $sortedList[] = $contentList[$order];
-                    #unset($contentList[$id]);
+                // Sort by $ids
+                $sortedList = array();
+                foreach ($ids as $order) {
+                    if (isset($contentList[$order])) {
+                        $sortedList[] = $contentList[$order];
+                        #unset($contentList[$id]);
+                    }
                 }
             }
-        }
+            return new JsonResponse($sortedList);
 
-        return new JsonResponse($sortedList);
+        } catch(\Exception $ex){
+            return $this->makeErrorResponse($ex->getMessage());
+        }
     }
 
     /**
@@ -212,47 +219,50 @@ class FileController implements ControllerProviderInterface
      */
     public function deleteContent($contenttype, $field, Request $request)
     {
+        try {
+            // Load field config of containing page
+            $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
+            $field = preg_replace("/[^a-z0-9\\-_]+/i", "", $field);
+            $data = json_decode($request->getContent(), true);
 
-        // Load field config of containing page
-        $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
-        $field       = preg_replace("/[^a-z0-9\\-_]+/i", "", $field);
-        $data        = json_decode($request->getContent(), true);
+            if (!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
+                throw new \Exception ("Insufficient access rights");
 
-        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
-            return $this->makeErrorResponse("Insufficient access rights!");
+            $fieldConfig = $this->getFieldConfig($contenttype, $field);
+            $imageType = $fieldConfig["contenttype"];
 
-        $fieldConfig = $this->getFieldConfig($contenttype, $field);
-        $imageType = $fieldConfig["contenttype"];
-
-        // parse id slugs into id only array (Bolt has no "fetch multiple slugs" method, only a "fetch multiple ids" method)
-        $ids = array();
-        if(isset($data["delete"]) && is_array($data["delete"])) {
-            foreach ($data["delete"] as $slug) {
-                list($type, $id) = explode("/", $slug);
-                if ($type == $imageType && is_numeric($id))
-                    $ids[] = $id;
-            }
-        }
-
-        // Load all linked objects to see if they have a file
-        if($ids) {
-            $result = $this->app['storage']->getContent($imageType, array("id" => implode(" || ", $ids)));
-            if ($result) {
-                $result = $result instanceof Content ? array($result) : $result; // Bolt returns either array of Content or one single Content depending on number of results -.-
-
-                /* @var Content $content */
-                foreach ($result as $content){
-                    // Check and delete file if needed
-                    $file = $content->get("image.file");
-                    if($file)
-                        $this->removeFile($file);
-                    // Delete content object
-                    $this->app["storage"]->deleteContent($content->contenttype["singular_slug"], $content->id);
+            // parse id slugs into id only array (Bolt has no "fetch multiple slugs" method, only a "fetch multiple ids" method)
+            $ids = array();
+            if (isset($data["delete"]) && is_array($data["delete"])) {
+                foreach ($data["delete"] as $slug) {
+                    list($type, $id) = explode("/", $slug);
+                    if ($type == $imageType && is_numeric($id))
+                        $ids[] = $id;
                 }
             }
-        }
 
-        return $this->listContent($contenttype, $field, $request);
+            // Load all linked objects to see if they have a file
+            if ($ids) {
+                $result = $this->app['storage']->getContent($imageType, array("id" => implode(" || ", $ids)));
+                if ($result) {
+                    $result = $result instanceof Content ? array($result) : $result; // Bolt returns either array of Content or one single Content depending on number of results -.-
+
+                    /* @var Content $content */
+                    foreach ($result as $content) {
+                        // Check and delete file if needed
+                        $file = $content->get("image.file");
+                        if ($file)
+                            $this->removeFile($file);
+                        // Delete content object
+                        $this->app["storage"]->deleteContent($content->contenttype["singular_slug"], $content->id);
+                    }
+                }
+            }
+
+            return $this->listContent($contenttype, $field, $request);
+        } catch(\Exception $ex){
+            return $this->makeErrorResponse($ex->getMessage());
+        }
     }
 
     /**
@@ -264,24 +274,27 @@ class FileController implements ControllerProviderInterface
      */
     public function iframe($contenttype, $field, Request $request)
     {
+        try{
+            $parentFieldConfig = $this->getFieldConfig($contenttype, $field);
+            $imageType = $parentFieldConfig["contenttype"];
 
-        $parentFieldConfig = $this->getFieldConfig($contenttype, $field);
-        $imageType = $parentFieldConfig["contenttype"];
+            if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
+                throw new \Exception ("Insufficient access rights");
 
-        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
-            return $this->makeErrorResponse("Insufficient access rights!");
+            $imageConfig = $this->app['storage']->getContentType($imageType);
 
-        $imageConfig = $this->app['storage']->getContentType($imageType);
+            $rendered = $this->app['render']->render('iframeUpload.twig',array(
+                    'config' => $this->config,
+                    'contenttype' => $contenttype,
+                    'field' => $field,
+                    'imagefields' => $imageConfig['fields'],
+                )
+            );
 
-        $rendered = $this->app['render']->render('iframeUpload.twig',array(
-                'config' => $this->config,
-                'contenttype' => $contenttype,
-                'field' => $field,
-                'imagefields' => $imageConfig['fields'],
-            )
-        );
-
-        return $rendered;
+            return $rendered;
+        } catch(\Exception $ex){
+            return $this->makeErrorResponse($ex->getMessage());
+        }
     }
 
     /**
@@ -378,7 +391,6 @@ class FileController implements ControllerProviderInterface
      */
     protected function removeFile($path)
     {
-
         $basePath = $this->app["resources"]->getPath("filespath");
         unlink($basePath.$path);
     }
@@ -387,7 +399,7 @@ class FileController implements ControllerProviderInterface
         return new JsonResponse(array(
             "status" => "error",
             "message" => $message
-        ));
+        ),500);
     }
 
 }
