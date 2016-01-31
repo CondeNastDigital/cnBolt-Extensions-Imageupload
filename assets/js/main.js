@@ -340,9 +340,9 @@ $(document).ready(function () {
             var output = '<p><label class="' + title + '" style="text-transform:capitalize;float:left;">' + label + ':</label>';
 
             if(fieldObj.type == "textarea")
-                output += '<textarea name="value[' + index + '][' + title + ']" class="type-'+fieldObj.type+'">'+value.replace(/"/,"&quot;")+'</textarea>';
+                output += '<textarea name="value[' + index + '][' + title + ']" class="type-'+fieldObj.type+'">'+value.replace(/"/g,"&quot;")+'</textarea>';
             else
-                output += '<input value="' + value.replace(/"/,"&quot;") + '" name="value[' + index + '][' + title + ']" type="text" class="type-'+fieldObj.type+'"/>';
+                output += '<input value="' + value.replace(/"/g,"&quot;") + '" name="value[' + index + '][' + title + ']" type="text" class="type-'+fieldObj.type+'"/>';
 
             output += '</p>';
             return output;
