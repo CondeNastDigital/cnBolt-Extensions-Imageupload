@@ -9,22 +9,25 @@ $(document).ready(function () {
 
     initialize();
 
-
-    // Selectable
+    /**
+     * Sort Handler
+     * resets the indizes of all fields accordingly after sorting (drag drop) has ended
+     */
     $('#files').sortable({
         stop: function(){
             var nodes = $('#metaFields').find('#files').find('div.node');
             if (nodes.length > 0) {
                 $.each(nodes, function (i) {
+                    // Correct index of hidden id fields
                     $(this).attr('id','node'+i);
                     $(this).find("input[name^=id]").attr('name','id['+i+']');
-
+                    // Correct indext of editable fields
                     var pNodes = $(this).find('.metacontainer').children('p');
                     var metafield;
                     $.each(pNodes, function(){
                         var label = ($(this).find('label'));
                         metafield = label.attr('class');
-                        $(this).find("input[name^=value]").attr('name','value['+i+']['+metafield+']');
+                        $(this).find("[name^=value]").attr('name','value['+i+']['+metafield+']');
                     });
 
                 });
@@ -32,8 +35,10 @@ $(document).ready(function () {
         }
     }).disableSelection();
 
-
-    // Click AddFiles Button
+    /**
+     * Click AddFiles Button
+     * Prepare FileReader for newly added file and set canvas
+     */
     nodeFileupload.find('#btnAddFiles')
         .on('change', function () {
             var files = $(this).get(0).files;
@@ -48,19 +53,6 @@ $(document).ready(function () {
 
                 var context = createNode(data, name, "", index);
                 context.addClass('newFile');
-
-                /* disabled because of a bug
-
-                 //specific upload button
-                 context.find('.btnContainer')
-                 .append('<button title="Upload File" type="button" class="btn btn-small btn-primary btnUploadFile"><i class="glyphicon glyphicon-upload"></i></button>');
-
-                 //specific progress bar
-                 context.find('.progressContainer')
-                 .append('<progress value="0" max="100" id="node' + index + '_progress"></progress>');
-
-                 */
-
                 context.prependTo('#files');
 
                 context.find($('#node' + index + ' .imagecontainer'))
@@ -71,13 +63,14 @@ $(document).ready(function () {
                 reader.readAsDataURL(data);
 
                 index++;
-
             });
-
         });
 
 
-    // Click UploadAllFiles Button
+    /**
+     * Click UploadAllFiles Button
+     * iterate through all items, collect their data and post to ajax service
+     */
     nodeFileupload.find('#btnUploadAllFiles')
         .on('click', function () {
 
@@ -91,7 +84,7 @@ $(document).ready(function () {
 
                     var id = $(this).attr('id').replace('node', '');
                     var file = $(this).data('file');
-                    var metaFields = $('#metaFields').find('#node' + id).find('input');
+                    var metaFields = $('#metaFields').find('#node' + id).find('input,textarea');
 
                     if (file instanceof File) {
                         data.append('file_' + id, file);
@@ -131,7 +124,10 @@ $(document).ready(function () {
         });
 
 
-    // Click SpecificDeleteFile Button
+    /**
+     * Click SpecificDeleteFile Button
+     * get id of specified file and call ajax delete service
+     */
     $(document).on('click', '.btnDeleteFile', function () {
         var parent = $(this).closest('div[id]');
         var newFile = parent.hasClass('newFile');
@@ -173,75 +169,6 @@ $(document).ready(function () {
             });
         }
     });
-
-    /* disabled because of a bug
-     * if you upload a file using the single upload button and you click then on the upload all / save button, the file will be uploaded twice
-     *
-     // Click SpecificUploadFile Button
-     $(document).on('click', '.btnUploadFile', function () {
-     var button = $(this);
-     var parent = $(this).closest('div[id]');
-     var data = new FormData();
-
-     var node = parent.attr('id');
-     var id = node.replace('node', '');
-     var file = parent.data('file');
-
-     var metaFields = $('#metaFields').find('#node' + id).find('input');
-
-     if (file instanceof File) {
-     data.append('file_' + id, file);
-     }
-
-     $.each(metaFields, function () {
-     var key = ($(this).attr('name'));
-     var value = ($(this).val());
-
-     data.append(key, value);
-     });
-
-     $.ajax({
-     url: storeUrl,
-     type: 'POST',
-     xhr: function () {
-     var myXhr = $.ajaxSettings.xhr();
-     if (myXhr.upload) {
-     myXhr.upload.addEventListener('progress', progressHandlingFunction(node), false);
-     }
-     return myXhr;
-     },
-     data: data,
-     processData: false,
-     contentType: false,
-     success: function (res) {
-
-     var jsonObj = $.parseJSON(inputImageIds.val());
-     var contentObject = jsonObj.content;
-
-     $.each(res, function () {
-     contentObject.push($(this)[0].id_slug);
-     });
-
-     var jsonString = JSON.stringify(contentObject);
-
-     inputImageIds.val('{"content": ' + jsonString + '}');
-
-     button.addClass('btn-success').removeClass('btn-primary btn-danger btnUploadFile');
-     button.find('.glyphicon-upload').addClass('glyphicon-ok').removeClass('glyphicon-upload glyphicon-remove');
-     $('#' + node).addClass('success').removeClass('error newFile').find('button.btnDeleteFile').remove();
-
-     nodeFileupload.find('.infotext').removeClass('bg-success bg-danger').text('');
-
-     },
-     error: function (err) {
-     console.log(err.responseText);
-     button.addClass('btn-danger').removeClass('btn-primary');
-     button.find('.glyphicon-upload').addClass('glyphicon-remove');
-     $('#' + node).addClass('error');
-     }
-     })
-     });
-     */
 
     //first initial loading of linked imageObjects while loading a new or present page
     function initialize() {
@@ -318,7 +245,6 @@ $(document).ready(function () {
 
 
         /* disabled because of the single upload button bug
-
          //specific progress bar
          context.find('.metacontainer').append('<div class="progressContainer"></div>');
          */
@@ -340,9 +266,9 @@ $(document).ready(function () {
             var output = '<p><label class="' + title + '" style="text-transform:capitalize;float:left;">' + label + ':</label>';
 
             if(fieldObj.type == "textarea")
-                output += '<textarea name="value[' + index + '][' + title + ']" class="type-'+fieldObj.type+'">'+value.replace(/"/,"&quot;")+'</textarea>';
+                output += '<textarea name="value[' + index + '][' + title + ']" class="type-'+fieldObj.type+'">'+value.replace(/"/g,"&quot;")+'</textarea>';
             else
-                output += '<input value="' + value.replace(/"/,"&quot;") + '" name="value[' + index + '][' + title + ']" type="text" class="type-'+fieldObj.type+'"/>';
+                output += '<input value="' + value.replace(/"/g,"&quot;") + '" name="value[' + index + '][' + title + ']" type="text" class="type-'+fieldObj.type+'"/>';
 
             output += '</p>';
             return output;
