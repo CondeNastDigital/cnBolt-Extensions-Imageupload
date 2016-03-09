@@ -5,7 +5,7 @@ $(document).ready(function () {
     var storeUrl = pathsroot + 'bolt/imageupload/store/' + parentContenttype + '/' + parentField;
     var listUrl = pathsroot + 'bolt/imageupload/list/' + parentContenttype + '/' + parentField;
     var deleteUrl = pathsroot + 'bolt/imageupload/delete/' + parentContenttype + '/' + parentField;
-    var inputImageIds = $('input#imageupload', parent.document);
+    var inputImageIds = $('input#'+parentField, parent.document);
 
     initialize();
 
