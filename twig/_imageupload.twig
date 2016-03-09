@@ -1,7 +1,13 @@
+{% set option = {
+label:        field.label|default('Multi Fileupload'),
+height:       field.height|default('455px'),
+info:         field.info|default('')
+} %}
+
 <fieldset class="imageupload">
     <div class="col-sm-12">
-        <label class="control-label">Multi Fileupload:</label>
-        <iframe src="{{ paths.root }}bolt/imageupload/iframe/{{ context.contenttype.singular_slug }}/{{ key }}" style="width:100%;height:700px;border:none"></iframe>
-        <input style="display:none" class="form-control large" name="{{ key }}" id="imageupload" value="{{ context.content.get(contentkey) }}" type="text">
+        <label class="control-label">{{ (option.info) ? macro.infopop(labelkey, option.info) : labelkey }}</label>
+        <iframe src="{{ paths.root }}bolt/imageupload/iframe/{{ context.contenttype.singular_slug }}/{{ key }}" style="width:100%;height:{{ option.height }};border:1px solid #ccc; border-radius:2px;inset 0px 1px 1px rgba(0,0,0,0.075)"></iframe>
+        <input style="display:none" class="form-control large" name="{{ key }}" id="{{ key }}" value="{{ context.content.get(contentkey) }}" type="text">
     </div>
 </fieldset>

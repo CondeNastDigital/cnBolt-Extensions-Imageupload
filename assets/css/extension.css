@@ -5,21 +5,24 @@
     z-index: 1000;
     width: 100%;
     background: #fff;
-    padding: 5px 10px;
+    padding: 5px 5px;
     top: 0;
-    border-bottom: 1px solid #ddd;
+    box-shadow: 0px 2px 2px 0px rgba(0,0,0,0.15);
 }
 #fileupload .infotext{
     padding: 8px 15px;
     margin: 5px 0;
     border-radius: 2px;
+    display: none;
 }
 #fileupload .infotext.bg-success { color: #7eac6b; }
 #fileupload .infotext.bg-danger { color: #b14a4a }
-
+#fileupload .fileupload-buttonbar .btn {
+    margin-bottom: 0px;
+}
 
 #metaFields{
-    top: 90px;
+    top: 45px;
     position: relative;
 }
 
