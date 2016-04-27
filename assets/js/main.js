@@ -195,7 +195,7 @@ $(document).ready(function () {
 
                     context.appendTo('#files');
                     context.find($('#node' + index + ' .imagecontainer'))
-                        .append($('<div style="background-image: url(' + pathsroot + 'files' + name + ')"/>').attr('class', 'imagethumb'));
+                        .append($('<div style="background-image: url(' + pathsroot + 'files/' + name + ')"/>').attr('class', 'imagethumb'));
 
                     index++;
                 });
