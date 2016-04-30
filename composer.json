@@ -24,7 +24,7 @@
     "extra": {
         "bolt-assets": "assets",
         "branch-alias" : {
-            "bolt-3" : "2.0.x-dev"
+            "dev-bolt3" : "2.0.x-dev"
         }
     }    
 }
