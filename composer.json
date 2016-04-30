@@ -3,7 +3,7 @@
     "description": "Extension to upload multiple images with metainformations",
     "type": "bolt-extension",
     "require": {
-        "bolt/bolt": ">=2.0.0,<3.0.0"
+        "bolt/bolt": ">=3.0.0,<4.0.0"
     },
     "license": "",
     "authors": [
