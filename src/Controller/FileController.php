@@ -3,7 +3,7 @@
 namespace Bolt\Extension\CND\ImageUpload\Controller;
 
 use Bolt\Application;
-use Bolt\Content;
+use Bolt\Storage\Entity\Content;
 use Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
@@ -25,7 +25,7 @@ class FileController implements ControllerProviderInterface
     {
         $this->app = $app;
         $this->config = $config;
-        $this->app['twig.loader.filesystem']->prependPath(__DIR__."/../twig");
+        $this->app['twig.loader.filesystem']->prependPath(__DIR__."/../../templates");
     }
 
     public function connect(\Silex\Application $app)
@@ -75,6 +75,7 @@ class FileController implements ControllerProviderInterface
                 }
 
             $contentList = array();
+            $sortedList = array();
 
             // Load all linked images and make them suitable for output
             if($ids) {
@@ -88,7 +89,6 @@ class FileController implements ControllerProviderInterface
                 }
 
                 // Sort by $ids
-                $sortedList = array();
                 foreach($ids as $order){
                     if( isset($contentList[$order]) ) {
                         $sortedList[] = $contentList[$order];
@@ -148,14 +148,14 @@ class FileController implements ControllerProviderInterface
                     if (!$element)
                         throw new \Exception("Failed to create contenttype '$contenttype''");
 
-                    $element->setValue("datepublish", date("Y-m-d H:i:s"));
-                    $element->setValue("status", "published");
+                    $element->set("datepublish", date("Y-m-d H:i:s"));
+                    $element->set("status", "published");
                 }
 
                 // update values
                 $elementValues = isset($values[$idx]) ? $values[$idx] : array();
                 foreach ($elementValues as $key => $value) {
-                    $element->setValue($key, $value);
+                    $element->set($key, $value);
                 }
 
                 // set file
@@ -170,7 +170,7 @@ class FileController implements ControllerProviderInterface
                     // Store new file
 
                     $file = $this->storeFile($request->files->get($fileField));
-                    $element->setValue("image", array("file" => $file));
+                    $element->set("image", array("file" => $file));
                 }
 
                 // Store content
@@ -179,6 +179,7 @@ class FileController implements ControllerProviderInterface
 
             // Return current items
             $contentList = array();
+            $sortedList = array();
 
             if ($ids) {
                 $result = $this->app['storage']->getContent($imageType, array("id" => implode(" || ", $ids)));
@@ -190,7 +191,6 @@ class FileController implements ControllerProviderInterface
                 }
 
                 // Sort by $ids
-                $sortedList = array();
                 foreach ($ids as $order) {
                     if (isset($contentList[$order])) {
                         $sortedList[] = $contentList[$order];
@@ -254,7 +254,7 @@ class FileController implements ControllerProviderInterface
                         if ($file)
                             $this->removeFile($file);
                         // Delete content object
-                        $this->app["storage"]->deleteContent($content->contenttype["singular_slug"], $content->id);
+                        $this->app["storage"]->deleteContent($content->getContenttype()["singular_slug"], $content->getId());
                     }
                 }
             }
@@ -334,9 +334,9 @@ class FileController implements ControllerProviderInterface
     {
 
         $out = array();
-        $out["id"] = $content->id;
-        $out["id_slug"] = $content->contenttype["slug"]."/".$content->id;
-        $out["contenttype"] = $content->contenttype["singular_slug"];
+        $out["id"] = $content->getId();
+        $out["id_slug"] = $content->getContenttype()["slug"]."/".$content->id;
+        $out["contenttype"] = $content->getContenttype()["singular_slug"];
         $out["user"] = array();
         $out["user"]["id"] = $content->user["id"];
         $out["user"]["username"] = $content->user["username"];

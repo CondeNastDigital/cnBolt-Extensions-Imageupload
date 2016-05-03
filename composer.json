@@ -3,7 +3,7 @@
     "description": "Extension to upload multiple images with metainformations",
     "type": "bolt-extension",
     "require": {
-        "bolt/bolt": ">=3.0.0@dev,<4.0.0"
+        "bolt/bolt": ">=3.0.0,<4.0.0"
     },
     "license": "",
     "authors": [
@@ -13,16 +13,12 @@
         }
     ],
     "autoload": {
-        "files": [
-            "init.php"
-        ],
         "psr-4": {
-            "Bolt\\Extension\\CND\\ImageUpload\\": ""
+            "Bolt\\Extension\\CND\\ImageUpload\\": "src"
         }
     },
-    
     "extra": {
-        "bolt-assets": "assets",
+        "bolt-assets": "web",
         "branch-alias" : {
             "dev-bolt3" : "2.0.x-dev"
         }
