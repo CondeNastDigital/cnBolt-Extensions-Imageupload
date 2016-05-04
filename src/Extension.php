@@ -46,15 +46,9 @@ class Extension extends SimpleExtension
         $config = $this->getConfig();
 
         return [
-            '/bolt/imageupload', new FileController($app, $config),
+            '/imageupload' => new FileController($app, $config),
         ];
     }
-
-    public function getName()
-    {
-        return "Multimage-Upload";
-    }
-
 }
 
 

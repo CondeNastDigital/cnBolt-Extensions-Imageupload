@@ -5,10 +5,8 @@ namespace Bolt\Extension\CND\ImageUpload\Controller;
 use Bolt\Application;
 use Bolt\Storage\Entity\Content;
 use Silex\ControllerProviderInterface;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Filesystem\Filesystem;
 
