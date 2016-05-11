@@ -23,10 +23,12 @@ class Extension extends SimpleExtension
      * {@inheritdoc}
      */
     protected function registerAssets(){
+        /*
         return [
             (new JavaScript('js/main.js'))->setZone(Zone::BACKEND),
             (new JavaScript('css/extension.css'))->setZone(Zone::BACKEND),
         ];
+        */
     }
 
     /**

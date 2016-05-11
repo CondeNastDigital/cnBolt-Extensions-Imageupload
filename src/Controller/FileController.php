@@ -3,7 +3,8 @@
 namespace Bolt\Extension\CND\ImageUpload\Controller;
 
 use Bolt\Application;
-use Bolt\Storage\Entity\Content;
+use Bolt\Legacy\Content;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
@@ -146,20 +147,21 @@ class FileController implements ControllerProviderInterface
                     if (!$element)
                         throw new \Exception("Failed to create contenttype '$contenttype''");
 
-                    $element->set("datepublish", date("Y-m-d H:i:s"));
-                    $element->set("status", "published");
+                    $element->setValue("datepublish", date("Y-m-d H:i:s"));
+                    $element->setValue("status", "published");
                 }
 
                 // update values
                 $elementValues = isset($values[$idx]) ? $values[$idx] : array();
                 foreach ($elementValues as $key => $value) {
-                    $element->set($key, $value);
+                    $element->setValue($key, $value);
                 }
 
                 // set file
                 $fileField = "file_" . $idx;
 
                 if ($request->files->has($fileField)) {
+
                     // Delete old file if neccessary
                     $current = $element->get("image");
                     if (isset($current["file"])) {
@@ -168,7 +170,7 @@ class FileController implements ControllerProviderInterface
                     // Store new file
 
                     $file = $this->storeFile($request->files->get($fileField));
-                    $element->set("image", array("file" => $file));
+                    $element->setValue("image", array("file" => $file));
                 }
 
                 // Store content
@@ -181,9 +183,11 @@ class FileController implements ControllerProviderInterface
 
             if ($ids) {
                 $result = $this->app['storage']->getContent($imageType, array("id" => implode(" || ", $ids)));
+
                 if ($result) {
                     $result = $result instanceof Content ? array($result) : $result; // Bolt returns either array of Content or one single Content depending on number of results -.-
 
+                    /* @var Content $content */
                     foreach ($result as $content)
                         $contentList[$content->id] = $this->filterContent($content);
                 }
@@ -332,9 +336,9 @@ class FileController implements ControllerProviderInterface
     {
 
         $out = array();
-        $out["id"] = $content->getId();
-        $out["id_slug"] = $content->getContenttype()["slug"]."/".$content->id;
-        $out["contenttype"] = $content->getContenttype()["singular_slug"];
+        $out["id"] = $content->id;
+        $out["id_slug"] = $content->contenttype["slug"]."/".$content->id;
+        $out["contenttype"] = $content->contenttype["singular_slug"];
         $out["user"] = array();
         $out["user"]["id"] = $content->user["id"];
         $out["user"]["username"] = $content->user["username"];
