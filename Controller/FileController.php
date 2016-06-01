@@ -307,22 +307,33 @@ class FileController implements ControllerProviderInterface
     protected function getFieldConfig($contenttype, $field)
     {
 
-        $contenttype = $this->app['storage']->getContentType($contenttype);
+        $fieldtype = str_replace('templatefields-','',$field, $count);
 
-        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
-            return $this->makeErrorResponse("Insufficient access rights!");
+        if($count > 0){
+            foreach ($this->app['config']->get('theme')['templatefields'] as $template => $value){
+
+                if($this->app['slugify']->slugify($template) == $contenttype){
+                    $contenttype = $value;
+                }
+            }
+        }else{
+            $contenttype = $this->app['storage']->getContentType($contenttype);
+        }
+
 
         if(!$contenttype)
-            return false;
+            throw new \Exception("contenttype not found");
 
-        if(isset($contenttype["fields"][$field]))
-            return $contenttype["fields"][$field];
+        if(!isset($contenttype["fields"][$fieldtype]))
+            throw new \Exception("field not found in contenttype");
+
+        $fieldConfig = $contenttype["fields"][$fieldtype];
 
         // Validation of minimal config
         if(!isset($fieldConfig["contenttype"]))
             throw new \Exception("contenttype for images not defined in parent contenttype's field");
 
-        return false;
+        return $fieldConfig;
     }
 
     /**
