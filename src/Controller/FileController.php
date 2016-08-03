@@ -256,7 +256,7 @@ class FileController implements ControllerProviderInterface
                         if ($file)
                             $this->removeFile($file);
                         // Delete content object
-                        $this->app["storage"]->deleteContent($content->getContenttype()["singular_slug"], $content->getId());
+                        $this->app["storage"]->deleteContent($content->contenttype["singular_slug"], $content->id);
                     }
                 }
             }
