@@ -19,9 +19,6 @@
     },
     "extra": {
         "bolt-assets": "web",
-        "branch-alias" : {
-            "dev-bolt3" : "2.0.x-dev"
-        },
         "bolt-class": "Bolt\\Extension\\CND\\ImageUpload\\Extension"
     }
 }
