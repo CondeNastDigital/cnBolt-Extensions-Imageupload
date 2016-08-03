@@ -250,6 +250,7 @@ class FileController implements ControllerProviderInterface
                     $result = $result instanceof Content ? array($result) : $result; // Bolt returns either array of Content or one single Content depending on number of results -.-
 
                     /* @var Content $content */
+
                     foreach ($result as $content) {
                         // Check and delete file if needed
                         $file = $content->get("image.file");
