@@ -312,7 +312,7 @@ class FileController implements ControllerProviderInterface
 
         $contenttype = $this->app['storage']->getContentType($contenttype);
 
-        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
+        if(!$this->app["users"]->isAllowed("contenttype:".$contenttype['singular_slug'].":edit"))
             return $this->makeErrorResponse("Insufficient access rights!");
 
         if(!$contenttype)
