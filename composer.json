@@ -8,8 +8,14 @@
     "license": "",
     "authors": [
         {
-            "name": "Danny Forster - Condé Nast Verlag GmbH",
-            "email": "danny.forster@condenast.de"
+            "name": "Condé Nast Verlag GmbH",
+            "email": "danny.forster@condenast.de",
+            "homepage": "https://techblog.condenast.de"
+        },
+        {
+            "name": "Condé Nast Verlag GmbH",
+            "email": "tobias.bulla@condenast.de",
+            "homepage": "https://techblog.condenast.de"
         }
     ],
     "autoload": {
@@ -19,6 +25,10 @@
     },
     "extra": {
         "bolt-assets": "web",
-        "bolt-class": "Bolt\\Extension\\CND\\ImageUpload\\Extension"
+        "bolt-class": "Bolt\\Extension\\CND\\ImageUpload\\Extension",
+        "bolt-icon": "icon_marketplace.png",
+        "bolt-screenshots": [
+            "screen_marketplace.png"
+        ]
     }
 }
