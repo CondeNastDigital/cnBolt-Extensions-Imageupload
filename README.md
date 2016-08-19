@@ -3,6 +3,8 @@
 Bolt Extension to upload multiple Files (Images) with meta-informations. This extension uses a configured contenttype for your images
 and created/updates these objects and stors a list of ids as a json string in the field.
 
+You have to click on the "Update" Button inside the field to update the changed images. Only saving the page containing the field will **not** update the images themselfes but only the links to them!
+
 Note: the field only stores je ids as a json string. Your template needs to parse the string and fetch the images itself. See sample below.
 
 ## Configuration
