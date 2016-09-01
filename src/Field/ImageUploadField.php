@@ -1,8 +1,8 @@
 <?php
 
-namespace Bolt\Extension\CND\ImageUpload;
+namespace Bolt\Extension\CND\ImageUpload\Field;
 
-use Bolt\Field\FieldInterface;
+use Bolt\Storage\Field\FieldInterface;
 
 class ImageUploadField implements FieldInterface
 {

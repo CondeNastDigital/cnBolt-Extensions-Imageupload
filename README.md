@@ -1,36 +1,18 @@
 # cnBolt-Extensions-Imageupload
 
-Bolt Extension to upload multiple Files (Images) with metainformations
+Bolt Extension to upload multiple Files (Images) with meta-informations. This extension uses a configured contenttype for your images
+and created/updates these objects and stors a list of ids as a json string in the field.
 
+You have to click on the "Update" Button inside the field to update the changed images. Only saving the page containing the field will **not** update the images themselfes but only the links to them!
 
-## Installation
-
-1.) Edit your extensions/composer.json file and add the **cnd-imageupload** repository:
-```
-    "repositories": {
-        "packagist": false,
-        "bolt": {
-            "type": "composer",
-            "url": "https://extensions.bolt.cm/satis/"
-        },
-        "cnd-imageupload": {
-            "type": "git",
-            "url": "https://github.com/CondeNastDigital/cnBolt-Extensions-Imageupload.git"
-        }
-    },
-```
-2.) Change to the extensions folder and install via composer.
-```
-composer require cnd/imageupload --prefer-dist
-```
-Installing or updating via the Bolt admin interface is also possible but would require the web-server's user to have proper access to the GitHup repository. This is usually not the case.
+Note: the field only stores je ids as a json string. Your template needs to parse the string and fetch the images itself. See sample below.
 
 ## Configuration
-Add the following field for your content type (within `contenttype.yml`). Those fields are mandatory.
+Add a contenttype for your image objects similar to the one shown here (within `contenttype.yml`).
 ```
-mycontenttype:  #all lowercase!!
-    name: Images   #Change here the displayname (plural)
-    singular_name: Image   #Change here the displayname (singular)
+image:
+    name: Images
+    singular_name: Image
     fields:   #add the fields you need in your content type (metainformations)
         title:  #mandatory
             label: Name
@@ -44,16 +26,16 @@ mycontenttype:  #all lowercase!!
             type: image
 ```
 
-Add the following field to your content type, where you what to add the extension. E.g. in pages:
+Add the following field to the contenttype where you want to add the images to. E.g. in pages:
 
 ```
-pages:
+page:
     name: Pages
     singular_name: Page
     fields:
         imageupload:
             type: imageupload
-            contenttype: mycontenttype   #must be the same name as the new defined contenttype above
+            contenttype: images   #must be the same name as the new defined contenttype above
 ```
 
 ## Usage

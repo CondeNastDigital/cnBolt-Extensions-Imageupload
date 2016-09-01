@@ -3,25 +3,32 @@
     "description": "Extension to upload multiple images with metainformations",
     "type": "bolt-extension",
     "require": {
-        "bolt/bolt": ">=2.0.0,<3.0.0"
+        "bolt/bolt": ">=3.0.0,<4.0.0"
     },
     "license": "",
     "authors": [
         {
-            "name": "Danny Forster - Condé Nast Verlag GmbH",
-            "email": "danny.forster@condenast.de"
+            "name": "Condé Nast Verlag GmbH",
+            "email": "danny.forster@condenast.de",
+            "homepage": "https://techblog.condenast.de"
+        },
+        {
+            "name": "Condé Nast Verlag GmbH",
+            "email": "tobias.bulla@condenast.de",
+            "homepage": "https://techblog.condenast.de"
         }
     ],
     "autoload": {
-        "files": [
-            "init.php"
-        ],
         "psr-4": {
-            "Bolt\\Extension\\CND\\ImageUpload\\": ""
+            "Bolt\\Extension\\CND\\ImageUpload\\": "src"
         }
     },
-    
     "extra": {
-        "bolt-assets": "assets"
+        "bolt-assets": "web",
+        "bolt-class": "Bolt\\Extension\\CND\\ImageUpload\\Extension",
+        "bolt-icon": "icon_marketplace.png",
+        "bolt-screenshots": [
+            "screen_marketplace.png"
+        ]
     }
 }

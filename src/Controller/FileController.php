@@ -3,12 +3,11 @@
 namespace Bolt\Extension\CND\ImageUpload\Controller;
 
 use Bolt\Application;
-use Bolt\Content;
+use Bolt\Legacy\Content;
+use Doctrine\DBAL\Query\QueryBuilder;
 use Silex\ControllerProviderInterface;
-use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Filesystem\Filesystem;
 
@@ -25,7 +24,7 @@ class FileController implements ControllerProviderInterface
     {
         $this->app = $app;
         $this->config = $config;
-        $this->app['twig.loader.filesystem']->prependPath(__DIR__."/../twig");
+        $this->app['twig.loader.filesystem']->prependPath(__DIR__."/../../templates");
     }
 
     public function connect(\Silex\Application $app)
@@ -75,6 +74,7 @@ class FileController implements ControllerProviderInterface
                 }
 
             $contentList = array();
+            $sortedList = array();
 
             // Load all linked images and make them suitable for output
             if($ids) {
@@ -88,7 +88,6 @@ class FileController implements ControllerProviderInterface
                 }
 
                 // Sort by $ids
-                $sortedList = array();
                 foreach($ids as $order){
                     if( isset($contentList[$order]) ) {
                         $sortedList[] = $contentList[$order];
@@ -162,6 +161,7 @@ class FileController implements ControllerProviderInterface
                 $fileField = "file_" . $idx;
 
                 if ($request->files->has($fileField)) {
+
                     // Delete old file if neccessary
                     $current = $element->get("image");
                     if (isset($current["file"])) {
@@ -179,18 +179,20 @@ class FileController implements ControllerProviderInterface
 
             // Return current items
             $contentList = array();
+            $sortedList = array();
 
             if ($ids) {
                 $result = $this->app['storage']->getContent($imageType, array("id" => implode(" || ", $ids)));
+
                 if ($result) {
                     $result = $result instanceof Content ? array($result) : $result; // Bolt returns either array of Content or one single Content depending on number of results -.-
 
+                    /* @var Content $content */
                     foreach ($result as $content)
                         $contentList[$content->id] = $this->filterContent($content);
                 }
 
                 // Sort by $ids
-                $sortedList = array();
                 foreach ($ids as $order) {
                     if (isset($contentList[$order])) {
                         $sortedList[] = $contentList[$order];
@@ -248,6 +250,7 @@ class FileController implements ControllerProviderInterface
                     $result = $result instanceof Content ? array($result) : $result; // Bolt returns either array of Content or one single Content depending on number of results -.-
 
                     /* @var Content $content */
+
                     foreach ($result as $content) {
                         // Check and delete file if needed
                         $file = $content->get("image.file");
@@ -307,33 +310,22 @@ class FileController implements ControllerProviderInterface
     protected function getFieldConfig($contenttype, $field)
     {
 
-        $fieldtype = str_replace('templatefields-','',$field, $count);
+        $contenttype = $this->app['storage']->getContentType($contenttype);
 
-        if($count > 0){
-            foreach ($this->app['config']->get('theme')['templatefields'] as $template => $value){
-
-                if($this->app['slugify']->slugify($template) == $contenttype){
-                    $contenttype = $value;
-                }
-            }
-        }else{
-            $contenttype = $this->app['storage']->getContentType($contenttype);
-        }
-
+        if(!$this->app["users"]->isAllowed("contenttype:".$contenttype['singular_slug'].":edit"))
+            return $this->makeErrorResponse("Insufficient access rights!");
 
         if(!$contenttype)
-            throw new \Exception("contenttype not found");
+            return false;
 
-        if(!isset($contenttype["fields"][$fieldtype]))
-            throw new \Exception("field not found in contenttype");
-
-        $fieldConfig = $contenttype["fields"][$fieldtype];
+        if(isset($contenttype["fields"][$field]))
+            return $contenttype["fields"][$field];
 
         // Validation of minimal config
         if(!isset($fieldConfig["contenttype"]))
             throw new \Exception("contenttype for images not defined in parent contenttype's field");
 
-        return $fieldConfig;
+        return false;
     }
 
     /**
