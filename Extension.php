@@ -8,6 +8,7 @@ use Bolt\Extension\CND\ImageUpload\Controller\FileController;
 
 class Extension extends BaseExtension
 {
+    private $path;
 
     public function __construct(Application $app)
     {
@@ -21,18 +22,13 @@ class Extension extends BaseExtension
     public function initialize()
     {
         $this->config = $this->getConfig();
-        $this->app->mount('/bolt/imageupload', new FileController($this->app, $this->config));
+
+        $this->path = $this->app['config']->get('general/branding/path');
+        $this->app->mount($this->path.'/imageupload', new FileController($this->app, $this->config));
     }
 
     public function getName()
     {
         return "Multimage-Upload";
     }
-
 }
-
-
-
-
-
-
