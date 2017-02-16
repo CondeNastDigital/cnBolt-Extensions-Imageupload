@@ -90,6 +90,10 @@ var ImageUploadST = function(properties) {
 
                     if(data.message == 'cnd-imageupload-ready') {
                         var ids = $(this.$('input.data-target')).val();
+
+                        if(ids == '')
+                            ids = '{ "content": [] }';
+
                         $(self.$('iframe'))[0].contentWindow.postMessage('{"message": "cnd-imageupload-init", "data": '+ids+'}','*',[]);
                     }
                 }
