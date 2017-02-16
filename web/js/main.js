@@ -193,7 +193,6 @@ $(document).ready(function () {
                     var entries = $(this)[0].values;
 
                     var data = removeEntriesFromObject(entries, blacklist, whitelist);
-                    console.debug(data);
                     var name = data.image.file;
                     var id = data.id;
                     var context = createNode(data, name, id, index);
@@ -318,7 +317,6 @@ $(document).ready(function () {
     }
 
     window.addEventListener('message', function(event){
-        console.debug(event);
         var data = JSON.parse(event.data);
         if(data.message=='cnd-imageupload-init') {
             initialize(JSON.stringify(data.data));

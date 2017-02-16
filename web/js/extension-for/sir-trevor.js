@@ -83,7 +83,6 @@ var ImageUploadST = function(properties) {
 
                 if(event.source.location.href.indexOf(src) > -1 ) {
                     var data = JSON.parse(event.data);
-                    console.debug(data);
 
                     if(data.message == 'cnd-imageupload-save') {
                         $(self.$('input.data-target')).val(JSON.stringify(data.data));
