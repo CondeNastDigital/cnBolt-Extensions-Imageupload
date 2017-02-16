@@ -14,9 +14,9 @@
     <script>
 
         pathsroot = '{{ paths.root }}';
-        pathsbolt = '{{ paths.bolt }}';
         parentContenttype = '{{ contenttype }}';
         parentField = '{{ field }}';
+        subField = '{{ subField }}';
         imagefields = {{ imagefields|json_encode|raw }};
 
     </script>
@@ -24,10 +24,9 @@
 
 </head>
 <body>
-
 <form class="form-horizontal tab-content">
     <div id="fileupload">
-        <noscript><input type="hidden" name="redirect" value="{{ paths.bolt }}"></noscript>
+        <noscript><input type="hidden" name="redirect" value="/bolt"></noscript>
         <div class="fileupload-buttonbar">
             <div>
                 <span class="btn btn-success fileinput-button">

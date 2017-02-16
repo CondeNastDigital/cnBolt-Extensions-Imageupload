@@ -19,7 +19,17 @@ class FileController implements ControllerProviderInterface
 
     private static $allowedExt = array("jpeg", "jpg", "png", "svg");
     const filesPath = "imageupload";
-
+    
+    /**
+     * Some content types allow the integration of the relationlist. The config of the field therefore can lay at
+     * different places. This config is the needed mapping for the know integrations.
+     * @var array
+     */
+    private $contentTypeConfigs = [
+        'default' => '',
+        'structuredcontentfield' => 'extend'
+    ];
+    
     public function __construct (Application $app, array $config)
     {
         $this->app = $app;
@@ -31,9 +41,13 @@ class FileController implements ControllerProviderInterface
     {
         $ctr = $app['controllers_factory'];
         $ctr->get('/iframe/{contenttype}/{field}', array($this, 'iframe'));
+        $ctr->get('/iframe/{contenttype}/{field}/{subfield}', array($this, 'iframe'));
         $ctr->post('/list/{contenttype}/{field}', array($this, 'listContent'));
+        $ctr->post('/list/{contenttype}/{field}/{subfield}', array($this, 'listContent'));
         $ctr->post('/store/{contenttype}/{field}', array($this, 'storeContent'));
+        $ctr->post('/store/{contenttype}/{field}/{subfield}', array($this, 'storeContent'));
         $ctr->post('/delete/{contenttype}/{field}', array($this, 'deleteContent'));
+        $ctr->post('/delete/{contenttype}/{field}/{subfield}', array($this, 'deleteContent'));
 
         return $ctr;
     }
@@ -50,7 +64,7 @@ class FileController implements ControllerProviderInterface
      * @return JsonResponse
      * @throws \Exception
      */
-    public function listContent($contenttype, $field, Request $request)
+    public function listContent($contenttype, $field, $subfield=null, Request $request)
     {
         try{
             // Load field config of containing page
@@ -61,7 +75,7 @@ class FileController implements ControllerProviderInterface
             if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
                 throw new \Exception ("Insufficient access rights");
 
-            $fieldConfig = $this->getFieldConfig($contenttype, $field);
+            $fieldConfig = $this->getFieldConfig($contenttype, $field, $subfield);
             $imageType = $fieldConfig["contenttype"];
 
             // parse id slugs into id only array (Bolt has no "fetch multiple slugs" method, only a "fetch multiple ids" method)
@@ -115,17 +129,17 @@ class FileController implements ControllerProviderInterface
      * @return JsonResponse
      * @throws \Exception
      */
-    public function storeContent($contenttype, $field, Request $request)
+    public function storeContent($contenttype, $field, $subfield=null, Request $request)
     {
         try {
             // Load field config of containing page
             $contenttype = preg_replace("/[^a-z0-9\\-_]+/i", "", $contenttype);
             $field = preg_replace("/[^a-z0-9\\-_]+/i", "", $field);
-
+            
             if (!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
                 throw new \Exception ("Insufficient access rights");
 
-            $fieldConfig = $this->getFieldConfig($contenttype, $field);
+            $fieldConfig = $this->getFieldConfig($contenttype, $field, $subfield);
             $imageType = $fieldConfig["contenttype"];
 
             // process all elements from form
@@ -172,9 +186,14 @@ class FileController implements ControllerProviderInterface
                     $file = $this->storeFile($request->files->get($fileField));
                     $element->setValue("image", array("file" => $file));
                 }
-
+                
                 // Store content
-                $id = $this->app["storage"]->saveContent($element);
+                try{
+                    $id = $this->app["storage"]->saveContent($element);
+                } catch (\Exception $e) {
+                    throw new \Exception(\json_encode($element));
+                }
+                
             }
 
             // Return current items
@@ -219,7 +238,7 @@ class FileController implements ControllerProviderInterface
      * @return JsonResponse
      * @throws \Exception
      */
-    public function deleteContent($contenttype, $field, Request $request)
+    public function deleteContent($contenttype, $field, $subfield=null,  Request $request)
     {
         try {
             // Load field config of containing page
@@ -230,9 +249,9 @@ class FileController implements ControllerProviderInterface
             if (!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
                 throw new \Exception ("Insufficient access rights");
 
-            $fieldConfig = $this->getFieldConfig($contenttype, $field);
+            $fieldConfig = $this->getFieldConfig($contenttype, $field, $subfield);
             $imageType = $fieldConfig["contenttype"];
-
+            
             // parse id slugs into id only array (Bolt has no "fetch multiple slugs" method, only a "fetch multiple ids" method)
             $ids = array();
             if (isset($data["delete"]) && is_array($data["delete"])) {
@@ -248,21 +267,19 @@ class FileController implements ControllerProviderInterface
                 $result = $this->app['storage']->getContent($imageType, array("id" => implode(" || ", $ids)));
                 if ($result) {
                     $result = $result instanceof Content ? array($result) : $result; // Bolt returns either array of Content or one single Content depending on number of results -.-
-
                     /* @var Content $content */
-
                     foreach ($result as $content) {
                         // Check and delete file if needed
                         $file = $content->get("image.file");
                         if ($file)
                             $this->removeFile($file);
                         // Delete content object
-                        $this->app["storage"]->deleteContent($content->contenttype["singular_slug"], $content->id);
+                        $this->app["storage"]->deleteContent($content->contenttype["singular_slug"], $content->get('id'));
                     }
                 }
             }
 
-            return $this->listContent($contenttype, $field, $request);
+            return $this->listContent($contenttype, $field, $subfield, $request);
         } catch(\Exception $ex){
             return $this->makeErrorResponse($ex->getMessage());
         }
@@ -275,10 +292,10 @@ class FileController implements ControllerProviderInterface
      * @param Request $request
      * @return mixed
      */
-    public function iframe($contenttype, $field, Request $request)
+    public function iframe($contenttype, $field, $subfield=null, Request $request)
     {
         try{
-            $parentFieldConfig = $this->getFieldConfig($contenttype, $field);
+            $parentFieldConfig = $this->getFieldConfig($contenttype, $field, $subfield);
             $imageType = $parentFieldConfig["contenttype"];
 
             if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
@@ -290,6 +307,7 @@ class FileController implements ControllerProviderInterface
                     'config' => $this->config,
                     'contenttype' => $contenttype,
                     'field' => $field,
+                    'subField' => $subfield,
                     'imagefields' => $imageConfig['fields'],
                 )
             );
@@ -307,12 +325,12 @@ class FileController implements ControllerProviderInterface
      * @return mixed
      * @throws \Exception
      */
-    protected function getFieldConfig($contenttype, $field)
+    /*protected function getFieldConfig($contenttype, $field, $subfield=null)
     {
 
         $contenttype = $this->app['storage']->getContentType($contenttype);
 
-        if(!$this->app["users"]->isAllowed("contenttype:".$contenttype['singular_slug'].":edit"))
+        if(!$this->app["users"]->isAllowed("contenttype:$contenttype:edit"))
             return $this->makeErrorResponse("Insufficient access rights!");
 
         if(!$contenttype)
@@ -326,8 +344,40 @@ class FileController implements ControllerProviderInterface
             throw new \Exception("contenttype for images not defined in parent contenttype's field");
 
         return false;
-    }
+    } */
+    
+    protected function getFieldConfig($contenttype, $field, $subfield=null){
+        
+        $contenttype = $this->app['storage']->getContentType($contenttype);
 
+        if(!$contenttype)
+            return false;
+        
+        $fieldDefinition = $contenttype['fields'][$field];
+        
+        if(isset($this->contentTypeConfigs[$fieldDefinition['type']]))
+            $configPath = $this->contentTypeConfigs[$fieldDefinition['type']];
+        else
+            $configPath = $this->contentTypeConfigs['default'];
+        
+        
+        if($subfield)
+            $configPath .= '.'.$subfield;
+        
+        $configPath = explode('.', $configPath);
+        $config     = $fieldDefinition;
+
+        foreach ($configPath as $path)
+            if($path == '')
+                continue;
+            elseif(isset($config[$path]))
+                $config = $config[$path];
+            else
+                $config = false;
+        
+        return $config;
+    }
+    
     /**
      * Filter a contentobject to be suitable for json output
      * @param $content

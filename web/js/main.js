@@ -2,9 +2,9 @@ $(document).ready(function () {
 
     var index;
     var nodeFileupload = $('#fileupload');
-    var storeUrl = pathsbolt + 'imageupload/store/' + parentContenttype + '/' + parentField;
-    var listUrl = pathsbolt + 'imageupload/list/' + parentContenttype + '/' + parentField;
-    var deleteUrl = pathsbolt + 'imageupload/delete/' + parentContenttype + '/' + parentField;
+    var storeUrl = pathsroot + 'bolt/imageupload/store/' + parentContenttype + '/' + parentField;
+    var listUrl = pathsroot + 'bolt/imageupload/list/' + parentContenttype + '/' + parentField;
+    var deleteUrl = pathsroot + 'bolt/imageupload/delete/' + parentContenttype + '/' + parentField;
     var inputImageIds = $('input#'+parentField, parent.document);
 
     initialize();
@@ -33,7 +33,7 @@ $(document).ready(function () {
                 });
             }
         }
-    });
+    }).disableSelection();
 
     /**
      * Click AddFiles Button

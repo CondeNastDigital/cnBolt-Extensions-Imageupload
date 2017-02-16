@@ -36,10 +36,6 @@
     font-size: 13px;
     display: block;
     width: 25%;
-    -ms-user-select: none;
-    -moz-user-select: none;
-    -webkit-user-select: none;
-    user-select: none;
 }
 
 #metaFields input,textarea {

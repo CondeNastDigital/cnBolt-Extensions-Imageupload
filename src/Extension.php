@@ -23,12 +23,26 @@ class Extension extends SimpleExtension
      * {@inheritdoc}
      */
     protected function registerAssets(){
-        /*
+    
+        $config = $this->getConfig();
+        $config = json_encode($config);
+    
+        $resources    = $this->container['resources'];
+        $extensionUrl = $resources->getUrl('bolt');
+        $extensionWebPath = $resources->getUrl('root');
+        
         return [
-            (new JavaScript('js/main.js'))->setZone(Zone::BACKEND),
-            (new JavaScript('css/extension.css'))->setZone(Zone::BACKEND),
+            (new JavaScript('js/extension-for/sir-trevor.js'))->setZone(Zone::BACKEND)
+                ->setAttributes([
+                    "data-extension-imageupload-config=".$config,
+                    "data-root-url=".$extensionWebPath,
+                    "data-extension-url=".$extensionUrl,
+                ])
+                ->setLate(true)
+                ->setPriority(1),
+        //    (new JavaScript('css/extension.css'))->setZone(Zone::BACKEND),
         ];
-        */
+        
     }
 
     /**
