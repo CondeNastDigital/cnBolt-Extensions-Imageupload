@@ -34,7 +34,7 @@ $(document).ready(function () {
                 });
             }
         }
-    });
+    }).disableSelection();
 
     /**
      * Click AddFiles Button
