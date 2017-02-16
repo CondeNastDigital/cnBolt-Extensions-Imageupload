@@ -2,10 +2,11 @@ $(document).ready(function () {
 
     var index;
     var nodeFileupload = $('#fileupload');
-    var storeUrl = pathsroot + 'bolt/imageupload/store/' + parentContenttype + '/' + parentField;
-    var listUrl = pathsroot + 'bolt/imageupload/list/' + parentContenttype + '/' + parentField;
-    var deleteUrl = pathsroot + 'bolt/imageupload/delete/' + parentContenttype + '/' + parentField;
+    var storeUrl = pathsroot + 'bolt/imageupload/store/' + parentContenttype + '/' + parentField + '/' + subField;
+    var listUrl = pathsroot + 'bolt/imageupload/list/' + parentContenttype + '/' + parentField + '/' + subField;
+    var deleteUrl = pathsroot + 'bolt/imageupload/delete/' + parentContenttype + '/' + parentField + '/' + subField;
     var inputImageIds = $('input#'+parentField, parent.document);
+    var currentIds = null;
 
     initialize();
 
@@ -139,7 +140,7 @@ $(document).ready(function () {
         } else {
 
             var imageId = $('#' + node).find('.hiddenIdField').val();
-            var jsonObj = $.parseJSON(inputImageIds.val());
+            var jsonObj = $.parseJSON(currentIds || inputImageIds.val());
             var arr = jsonObj.content;
 
             $.each(arr, function (key, value) {
@@ -171,14 +172,17 @@ $(document).ready(function () {
     });
 
     //first initial loading of linked imageObjects while loading a new or present page
-    function initialize() {
+    function initialize(data) {
 
         index = 0;
+
+        if(data)
+            currentIds = data;
 
         $.ajax({
             url: listUrl,
             type: 'POST',
-            data: inputImageIds.val(),
+            data: data || inputImageIds.val(),
             success: function (res) {
 
                 blacklist = ['datechanged', 'datecreated', 'datedepublish', 'datepublish', 'ownerid', 'slug', 'status', 'templatefields'];
@@ -189,6 +193,7 @@ $(document).ready(function () {
                     var entries = $(this)[0].values;
 
                     var data = removeEntriesFromObject(entries, blacklist, whitelist);
+                    console.debug(data);
                     var name = data.image.file;
                     var id = data.id;
                     var context = createNode(data, name, id, index);
@@ -221,11 +226,16 @@ $(document).ready(function () {
         });
 
         var jsonString = JSON.stringify(content);
+        var value = '{"content": ' + jsonString + '}';
+        currentIds = value;
 
-        inputImageIds.val('{"content": ' + jsonString + '}');
+        //window.postMessage("message","*",[]);
+        window.parent.postMessage('{"message": "cnd-imageupload-save", "name": "'+ String(window.name) +'" ,"data": ' + value + '}','*',[]);
+
+        inputImageIds.val(value);
 
         $('#files').empty();
-        initialize();
+        initialize(value);
     }
 
     //creates a imageobject node-container
@@ -239,9 +249,10 @@ $(document).ready(function () {
         context.append($('<div/>').attr('class', 'metacontainer'))
             .append('<input value="' + id + '" class="hiddenIdField" name="id[' + index + ']">');
 
-        $.each(imagefields, function (title, fieldObj) {
-            context.find('.metacontainer').append(getMetaFields(title, fieldObj, data));
-        });
+        if(imagefields instanceof Array)
+            $.each(imagefields, function (title, fieldObj) {
+                context.find('.metacontainer').append(getMetaFields(title, fieldObj, data));
+            });
 
 
         /* disabled because of the single upload button bug
@@ -305,5 +316,15 @@ $(document).ready(function () {
         });
         return data;
     }
+
+    window.addEventListener('message', function(event){
+        console.debug(event);
+        var data = JSON.parse(event.data);
+        if(data.message=='cnd-imageupload-init') {
+            initialize(JSON.stringify(data.data));
+        }
+    });
+
+    window.parent.postMessage('{"message": "cnd-imageupload-ready"}','*',[]);
 
 });

@@ -25,7 +25,8 @@ var ImageUploadST = function(properties) {
             label: '',
             contenttype: '',
             field: '',
-            subfield: ''
+            subfield: '',
+            height: ''
         },
         editorHTML:
         '<div>' +
@@ -58,14 +59,44 @@ var ImageUploadST = function(properties) {
          */
         onBlockRender: function() {
 
+            var self = this;
+
             this.fieldId = 'imageupload-st-' + String(new Date().valueOf());
 
             $(this.$('.block-title')).html(this.custom.label);
             $(this.$('input.data-target')).attr('id', this.fieldId);
             $(this.$('input.data-target')).hide();
 
-            var src = this.extensionWebPath+'imageupload/iframe/'+this.custom.contenttype+'/'+this.custom.field+'/'+this.custom.subfield;
+            var src = this.extensionUrl+'imageupload/iframe/'+this.custom.contenttype+'/'+this.custom.field;
+
+            if(this.custom.subfield != '')
+                src += '/' + this.custom.subfield;
+
+            src += '?name=' + this.fieldId;
+
             $(this.$('iframe')).attr('src', src);
+            $(this.$('iframe')).attr('height', this.custom.height);
+
+
+
+            window.addEventListener("message", function(event){
+
+                if(event.source.location.href.indexOf(src) > -1 ) {
+                    var data = JSON.parse(event.data);
+                    console.debug(data);
+
+                    if(data.message == 'cnd-imageupload-save') {
+                        $(self.$('input.data-target')).val(JSON.stringify(data.data));
+                    }
+
+                    if(data.message == 'cnd-imageupload-ready') {
+                        var ids = $(this.$('input.data-target')).val();
+                        $(self.$('iframe'))[0].contentWindow.postMessage('{"message": "cnd-imageupload-init", "data": '+ids+'}','*',[]);
+                    }
+                }
+
+
+            });
 
         }
 
