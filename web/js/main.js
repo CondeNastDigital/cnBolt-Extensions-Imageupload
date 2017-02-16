@@ -2,9 +2,9 @@ $(document).ready(function () {
 
     var index;
     var nodeFileupload = $('#fileupload');
-    var storeUrl = pathsroot + 'bolt/imageupload/store/' + parentContenttype + '/' + parentField + '/' + subField;
-    var listUrl = pathsroot + 'bolt/imageupload/list/' + parentContenttype + '/' + parentField + '/' + subField;
-    var deleteUrl = pathsroot + 'bolt/imageupload/delete/' + parentContenttype + '/' + parentField + '/' + subField;
+    var storeUrl = pathsbolt + 'imageupload/store/' + parentContenttype + '/' + parentField + '/' + subField;
+    var listUrl = pathsbolt + 'imageupload/list/' + parentContenttype + '/' + parentField + '/' + subField;
+    var deleteUrl = pathsbolt + 'imageupload/delete/' + parentContenttype + '/' + parentField + '/' + subField;
     var inputImageIds = $('input#'+parentField, parent.document);
     var currentIds = null;
 
@@ -34,7 +34,7 @@ $(document).ready(function () {
                 });
             }
         }
-    }).disableSelection();
+    });
 
     /**
      * Click AddFiles Button

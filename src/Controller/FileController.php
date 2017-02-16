@@ -188,11 +188,7 @@ class FileController implements ControllerProviderInterface
                 }
                 
                 // Store content
-                try{
-                    $id = $this->app["storage"]->saveContent($element);
-                } catch (\Exception $e) {
-                    throw new \Exception(\json_encode($element));
-                }
+                $id = $this->app["storage"]->saveContent($element);
                 
             }
 
