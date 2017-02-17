@@ -248,7 +248,7 @@ $(document).ready(function () {
         context.append($('<div/>').attr('class', 'metacontainer'))
             .append('<input value="' + id + '" class="hiddenIdField" name="id[' + index + ']">');
 
-        if(imagefields instanceof Array)
+        if(imagefields instanceof Object)
             $.each(imagefields, function (title, fieldObj) {
                 context.find('.metacontainer').append(getMetaFields(title, fieldObj, data));
             });
