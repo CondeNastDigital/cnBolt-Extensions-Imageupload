@@ -2,9 +2,19 @@ $(document).ready(function () {
 
     var index;
     var nodeFileupload = $('#fileupload');
-    var storeUrl = pathsbolt + 'imageupload/store/' + parentContenttype + '/' + parentField + '/' + subField;
-    var listUrl = pathsbolt + 'imageupload/list/' + parentContenttype + '/' + parentField + '/' + subField;
-    var deleteUrl = pathsbolt + 'imageupload/delete/' + parentContenttype + '/' + parentField + '/' + subField;
+
+    var storeUrl = pathsbolt + 'imageupload/store/' + parentContenttype + '/' + parentField ;
+    if(subField != '')
+        storeUrl += '/' + subField;
+
+    var listUrl = pathsbolt + 'imageupload/list/' + parentContenttype + '/' + parentField ;
+    if(subField != '')
+        listUrl += '/' + subField;
+
+    var deleteUrl = pathsbolt + 'imageupload/delete/' + parentContenttype + '/' + parentField;
+    if(subField != '')
+        deleteUrl += '/' + subField;
+
     var inputImageIds = $('input#'+parentField, parent.document);
     var currentIds = null;
 

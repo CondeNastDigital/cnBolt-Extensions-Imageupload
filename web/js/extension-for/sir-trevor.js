@@ -77,8 +77,6 @@ var ImageUploadST = function(properties) {
             $(this.$('iframe')).attr('src', src);
             $(this.$('iframe')).attr('height', this.custom.height);
 
-
-
             window.addEventListener("message", function(event){
 
                 if(event.source.location.href.indexOf(src) > -1 ) {
@@ -89,7 +87,7 @@ var ImageUploadST = function(properties) {
                     }
 
                     if(data.message == 'cnd-imageupload-ready') {
-                        var ids = $(this.$('input.data-target')).val();
+                        var ids = $(self.$('input.data-target')).val();
 
                         if(ids == '')
                             ids = '{ "content": [] }';
