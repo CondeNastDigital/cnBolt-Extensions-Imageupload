@@ -42,6 +42,7 @@ class FileController implements ControllerProviderInterface
         $ctr = $app['controllers_factory'];
         $ctr->get('/iframe/{contenttype}/{field}', array($this, 'iframe'));
         $ctr->get('/iframe/{contenttype}/{field}/{subfield}', array($this, 'iframe'));
+        $ctr->get('/list/{contenttype}/{field}', array($this, 'listContent'));
         $ctr->post('/list/{contenttype}/{field}', array($this, 'listContent'));
         $ctr->post('/list/{contenttype}/{field}/{subfield}', array($this, 'listContent'));
         $ctr->post('/store/{contenttype}/{field}', array($this, 'storeContent'));
